@@ -3,6 +3,7 @@
 
 extern uint16_t encoder_count[4];
 
+//覆盖hal库中的weak函数
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim){
     //编码器中断
     if( htim == &htim2 ){

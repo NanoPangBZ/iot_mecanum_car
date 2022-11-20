@@ -2,6 +2,5 @@
 #include "speed_calculate.h"
 
 void app_main(){
-    speed_calculate(NULL);
+    speed_calculate(NULL); 
 }
-

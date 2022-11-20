@@ -11,13 +11,22 @@
                 "e:\\UnderwayProject\\iot_macenum_car\\code\\iot_mecanum_car_controller\\Middlewares\\Third_Party\\FreeRTOS\\Source\\portable\\RVDS\\ARM_CM3",
                 "e:\\UnderwayProject\\iot_macenum_car\\code\\iot_mecanum_car_controller\\Drivers\\CMSIS\\Device\\ST\\STM32F1xx\\Include",
                 "e:\\UnderwayProject\\iot_macenum_car\\code\\iot_mecanum_car_controller\\Drivers\\CMSIS\\Include",
+                "e:\\UnderwayProject\\iot_macenum_car\\code\\iot_mecanum_car_controller\\USER\\function",
                 "e:\\UnderwayProject\\iot_macenum_car\\code\\iot_mecanum_car_controller\\USER\\service",
+                "e:\\UnderwayProject\\iot_macenum_car\\code\\iot_mecanum_car_controller\\USB_DEVICE\\App",
+                "e:\\UnderwayProject\\iot_macenum_car\\code\\iot_mecanum_car_controller\\USB_DEVICE\\Target",
+                "e:\\UnderwayProject\\iot_macenum_car\\code\\iot_mecanum_car_controller\\Middlewares\\ST\\STM32_USB_Device_Library\\Core\\Inc",
+                "e:\\UnderwayProject\\iot_macenum_car\\code\\iot_mecanum_car_controller\\Middlewares\\ST\\STM32_USB_Device_Library\\Class\\CDC\\Inc",
+                "e:\\UnderwayProject\\iot_macenum_car\\code\\iot_mecanum_car_controller\\USER",
+                "C:\\Keil_v5\\ARM\\ARMCC\\include",
+                "C:\\Keil_v5\\ARM\\ARMCC\\include\\rw",
                 "e:\\UnderwayProject\\iot_macenum_car\\code\\iot_mecanum_car_controller\\MDK-ARM",
                 "e:\\UnderwayProject\\iot_macenum_car\\code\\iot_mecanum_car_controller\\Core\\Src",
                 "e:\\UnderwayProject\\iot_macenum_car\\code\\iot_mecanum_car_controller\\Drivers\\STM32F1xx_HAL_Driver\\Src",
                 "e:\\UnderwayProject\\iot_macenum_car\\code\\iot_mecanum_car_controller\\Middlewares\\Third_Party\\FreeRTOS\\Source",
                 "e:\\UnderwayProject\\iot_macenum_car\\code\\iot_mecanum_car_controller\\Middlewares\\Third_Party\\FreeRTOS\\Source\\portable\\MemMang",
-                "e:\\UnderwayProject\\iot_macenum_car\\code\\iot_mecanum_car_controller\\USER"
+                "e:\\UnderwayProject\\iot_macenum_car\\code\\iot_mecanum_car_controller\\Middlewares\\ST\\STM32_USB_Device_Library\\Core\\Src",
+                "e:\\UnderwayProject\\iot_macenum_car\\code\\iot_mecanum_car_controller\\Middlewares\\ST\\STM32_USB_Device_Library\\Class\\CDC\\Src"
             ],
             "defines": [
                 "USE_HAL_DRIVER",
