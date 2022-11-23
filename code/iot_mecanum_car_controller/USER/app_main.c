@@ -1,6 +1,5 @@
 #include <stdio.h>
-#include "speed_calculate.h"
+#include "debug.h"
 
 void app_main(){
-    speed_calculate(NULL); 
 }

@@ -1,10 +1,8 @@
 /*
- * @Author: CodingBugStd 3096470072@qq.com
- * @Date: 2022-11-19 20:52:56
- * @LastEditors: CodingBugStd 3096470072@qq.com
- * @LastEditTime: 2022-11-20 02:05:31
- * @FilePath: \MDK-ARMe:\UnderwayProject\iot_macenum_car\code\iot_mecanum_car_controller\USER\service\motion_service.h
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ * @Date: 2022-11-19 20:54:40
+ * @LastEditors: 没人要的野指针 https://github.com/CodingBugStd
+ * @LastEditTime: 2022-11-20 23:09:13
+ * @Description: 运动控制
  */
 #ifndef _MOTION_CONTROL_H_
 #define _MOTION_CONTROL_H_
