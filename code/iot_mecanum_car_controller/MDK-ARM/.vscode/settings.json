@@ -6,6 +6,9 @@
         "stm32f1xx_hal_conf.h": "c",
         "tim.h": "c",
         "speed_calculate.h": "c",
-        "vofa_protocol.h": "c"
+        "vofa_protocol.h": "c",
+        "magnet.h": "c",
+        "debug.h": "c",
+        "dc_motor.h": "c"
     }
 }
