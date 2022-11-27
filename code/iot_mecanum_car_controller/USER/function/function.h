@@ -19,6 +19,7 @@
 #include "./speed_calculate/speed_calculate.h"
 #include "./ui/ui.h"
 #include "./vofa_protocol/vofa_protocol.h"
+#include "./battery/battery.h"
 
 #endif  //_FUNCTION_H_
 

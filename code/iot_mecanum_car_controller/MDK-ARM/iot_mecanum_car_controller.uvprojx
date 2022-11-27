@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xE,STM32_THREAD_SAFE_STRATEGY=4</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../USB_DEVICE/App;../USB_DEVICE/Target;../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;../USER;../USER/service;../USER/function/include</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../USB_DEVICE/App;../USB_DEVICE/Target;../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;../USER;../USER/service;../USER/function</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1471,6 +1471,11 @@
               <FileType>5</FileType>
               <FilePath>..\USER\function\function.h</FilePath>
             </File>
+            <File>
+              <FileName>debug.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\USER\debug.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1536,30 +1541,35 @@
               <FileType>1</FileType>
               <FilePath>..\USER\function\vofa_protocol\vofa_protocol.c</FilePath>
             </File>
+            <File>
+              <FileName>battery.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\function\battery\battery.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>SERVICE</GroupName>
           <Files>
             <File>
-              <FileName>motion_service.c</FileName>
+              <FileName>hmi_service.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\USER\service\motion_service.c</FilePath>
+              <FilePath>..\USER\service\hmi\hmi_service.c</FilePath>
             </File>
             <File>
               <FileName>iot_service.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\USER\service\iot_service.c</FilePath>
+              <FilePath>..\USER\service\iot\iot_service.c</FilePath>
             </File>
             <File>
-              <FileName>feedback_service.c</FileName>
+              <FileName>motion_service.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\USER\service\feedback_service.c</FilePath>
+              <FilePath>..\USER\service\motion\motion_service.c</FilePath>
             </File>
             <File>
-              <FileName>hmi_service.c</FileName>
+              <FileName>wavefrom_service.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\USER\service\hmi_service.c</FilePath>
+              <FilePath>..\USER\service\wavefrom\wavefrom_service.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -60,7 +60,11 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+void user_app_warper(void *param){
+    extern void app_main();
+    app_main();
+    vTaskDelete(NULL);
+}
 /* USER CODE END 0 */
 
 /**
@@ -106,7 +110,6 @@ int main(void)
   MX_USART3_UART_Init();
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
-
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -118,8 +121,14 @@ int main(void)
   /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	extern void app_main();
-	app_main();
+  xTaskCreate(
+    user_app_warper,
+    " ",
+    128,
+    NULL,
+    configMAX_PRIORITIES - 1,
+    NULL
+  );
   while (1)
   {
     /* USER CODE END WHILE */
