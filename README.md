@@ -76,7 +76,7 @@
 
 4. AMS1117 - 3.3 线性稳压IC
 
-5. LM317KTTR TO-263-3 稳压IC X 2 -> TB6612FNG供电
+5. LM2596S
 
 6. CJMCU-008 3轴磁力计模块
 
@@ -90,5 +90,4 @@
 
 11. ch340 X 2
 
-    
-
+    ![image-20221127150932150](E:\UnderwayProject\iot_macenum_car\README.assets\image-20221127150932150.png)
