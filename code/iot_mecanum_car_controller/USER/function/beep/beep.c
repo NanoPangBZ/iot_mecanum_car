@@ -7,4 +7,11 @@
  */
 #include "beep.h"
 
+void Beep_On(){
+
+}
+
+void Beep_Off(){
+
+}
 

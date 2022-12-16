@@ -7,5 +7,4 @@
 #ifndef _DC_MOTOR_H_
 #define _DC_MOTOR_H_
 
-
 #endif  //_DC_MOTOR_H_

@@ -35,5 +35,3 @@ void mecanum_inverse_calculate(const mecanum_constant_t* model,mecanum_input_t* 
     (*source)[3] = vz + w ;
 }
 
-
-

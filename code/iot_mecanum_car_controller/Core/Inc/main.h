@@ -57,6 +57,45 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define BAT_ADC_Pin GPIO_PIN_0
+#define BAT_ADC_GPIO_Port GPIOC
+#define KEY_ADC_Pin GPIO_PIN_1
+#define KEY_ADC_GPIO_Port GPIOC
+#define MT_PWM1_Pin GPIO_PIN_0
+#define MT_PWM1_GPIO_Port GPIOA
+#define MT_PWM2_Pin GPIO_PIN_1
+#define MT_PWM2_GPIO_Port GPIOA
+#define MT_PWM3_Pin GPIO_PIN_2
+#define MT_PWM3_GPIO_Port GPIOA
+#define MT_PWM4_Pin GPIO_PIN_3
+#define MT_PWM4_GPIO_Port GPIOA
+#define OLED_RES_Pin GPIO_PIN_12
+#define OLED_RES_GPIO_Port GPIOB
+#define OLED_SCK_Pin GPIO_PIN_13
+#define OLED_SCK_GPIO_Port GPIOB
+#define OLED_DC_Pin GPIO_PIN_14
+#define OLED_DC_GPIO_Port GPIOB
+#define OLED_MOSI_Pin GPIO_PIN_15
+#define OLED_MOSI_GPIO_Port GPIOB
+#define HALL4_CH_Pin GPIO_PIN_6
+#define HALL4_CH_GPIO_Port GPIOC
+#define HALL4_CHN_Pin GPIO_PIN_7
+#define HALL4_CHN_GPIO_Port GPIOC
+#define BEEP_PWM_Pin GPIO_PIN_8
+#define BEEP_PWM_GPIO_Port GPIOA
+#define HALL1_CH_Pin GPIO_PIN_15
+#define HALL1_CH_GPIO_Port GPIOA
+#define HALL1_CHN_Pin GPIO_PIN_3
+#define HALL1_CHN_GPIO_Port GPIOB
+#define HALL2_CH_Pin GPIO_PIN_4
+#define HALL2_CH_GPIO_Port GPIOB
+#define HALL2_CHN_Pin GPIO_PIN_5
+#define HALL2_CHN_GPIO_Port GPIOB
+#define HALL3_CH_Pin GPIO_PIN_6
+#define HALL3_CH_GPIO_Port GPIOB
+#define HALL3_CHN_Pin GPIO_PIN_7
+#define HALL3_CHN_GPIO_Port GPIOB
+
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
