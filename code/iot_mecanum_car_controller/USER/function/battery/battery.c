@@ -9,17 +9,17 @@
 //获取电量百分比
 uint8_t Battety_Grade_Get()
 {
-
+	return 0;
 }
 
 //获取电压值
 float Battery_Voltage_Get()
 {
-
+	return 0;
 }
 
 //当前是否在充电
 bool Battery_Charge_Get()
 {
-    
+    return false;
 }

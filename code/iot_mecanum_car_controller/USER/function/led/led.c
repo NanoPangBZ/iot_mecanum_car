@@ -6,4 +6,6 @@
  */
 #include "led.h"
 
-
+void led(led_t led,uint8_t onoff)
+{
+}

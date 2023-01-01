@@ -9,3 +9,6 @@
 
 #include "magnet.h"
 
+void magnet_get(float *buff_3float)
+{
+}

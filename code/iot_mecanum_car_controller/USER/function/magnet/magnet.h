@@ -9,7 +9,7 @@
 #ifndef _MAGNET_H_
 #define _MAGNET_H_
 
-
+void magnet_get(float *buff_3float);
 
 #endif  //_MAGNET_H_
 

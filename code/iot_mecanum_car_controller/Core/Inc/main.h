@@ -57,10 +57,21 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define OLED_SPI hspi2
+#define PWM_TIM htim5
+#define BEEP_TIM htim1
+#define HALL1_TIM htim2
+#define HALL2_TIM htim3
+#define HALL3_TIM htim4
+#define HALL4_TIM htim8
 #define BAT_ADC_Pin GPIO_PIN_0
 #define BAT_ADC_GPIO_Port GPIOC
 #define KEY_ADC_Pin GPIO_PIN_1
 #define KEY_ADC_GPIO_Port GPIOC
+#define MT1_DIR1_Pin GPIO_PIN_2
+#define MT1_DIR1_GPIO_Port GPIOC
+#define MT1_DIR2_Pin GPIO_PIN_3
+#define MT1_DIR2_GPIO_Port GPIOC
 #define MT_PWM1_Pin GPIO_PIN_0
 #define MT_PWM1_GPIO_Port GPIOA
 #define MT_PWM2_Pin GPIO_PIN_1
@@ -69,8 +80,26 @@ void Error_Handler(void);
 #define MT_PWM3_GPIO_Port GPIOA
 #define MT_PWM4_Pin GPIO_PIN_3
 #define MT_PWM4_GPIO_Port GPIOA
-#define OLED_RES_Pin GPIO_PIN_12
-#define OLED_RES_GPIO_Port GPIOB
+#define MT2_DIR1_Pin GPIO_PIN_4
+#define MT2_DIR1_GPIO_Port GPIOA
+#define MT2_DIR2_Pin GPIO_PIN_5
+#define MT2_DIR2_GPIO_Port GPIOA
+#define MT3_DIR1_Pin GPIO_PIN_6
+#define MT3_DIR1_GPIO_Port GPIOA
+#define MT3_DIR2_Pin GPIO_PIN_7
+#define MT3_DIR2_GPIO_Port GPIOA
+#define MT4_DIR1_Pin GPIO_PIN_4
+#define MT4_DIR1_GPIO_Port GPIOC
+#define MT4_DIR2_Pin GPIO_PIN_5
+#define MT4_DIR2_GPIO_Port GPIOC
+#define EX_IO3_Pin GPIO_PIN_0
+#define EX_IO3_GPIO_Port GPIOB
+#define EX_IO2_Pin GPIO_PIN_1
+#define EX_IO2_GPIO_Port GPIOB
+#define EX_IO1_Pin GPIO_PIN_2
+#define EX_IO1_GPIO_Port GPIOB
+#define OLED_CS_Pin GPIO_PIN_12
+#define OLED_CS_GPIO_Port GPIOB
 #define OLED_SCK_Pin GPIO_PIN_13
 #define OLED_SCK_GPIO_Port GPIOB
 #define OLED_DC_Pin GPIO_PIN_14
@@ -81,6 +110,10 @@ void Error_Handler(void);
 #define HALL4_CH_GPIO_Port GPIOC
 #define HALL4_CHN_Pin GPIO_PIN_7
 #define HALL4_CHN_GPIO_Port GPIOC
+#define TICK_LED_Pin GPIO_PIN_8
+#define TICK_LED_GPIO_Port GPIOC
+#define DEBUG_LED_Pin GPIO_PIN_9
+#define DEBUG_LED_GPIO_Port GPIOC
 #define BEEP_PWM_Pin GPIO_PIN_8
 #define BEEP_PWM_GPIO_Port GPIOA
 #define HALL1_CH_Pin GPIO_PIN_15
@@ -95,6 +128,8 @@ void Error_Handler(void);
 #define HALL3_CH_GPIO_Port GPIOB
 #define HALL3_CHN_Pin GPIO_PIN_7
 #define HALL3_CHN_GPIO_Port GPIOB
+#define OLED_RES_Pin GPIO_PIN_8
+#define OLED_RES_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

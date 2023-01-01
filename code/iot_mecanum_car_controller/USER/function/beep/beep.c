@@ -7,7 +7,7 @@
  */
 #include "beep.h"
 
-void Beep_On(){
+void Beep_On(uint16_t fre){
 
 }
 
