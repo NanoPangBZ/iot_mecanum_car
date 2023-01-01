@@ -7,5 +7,7 @@
 #ifndef _KEYBOARD_H_
 #define _KEYBOARD_H_
 
+int keycode_get(void);
+
 #endif //_KEYBOARD_H_
 

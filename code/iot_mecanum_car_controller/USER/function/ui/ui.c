@@ -6,3 +6,14 @@
  */
 #include "ui.h"
 
+void ui_page_set(ui_page_t page)
+{
+}
+
+void ui_input(ui_input_t input)
+{
+}
+
+void ui_callback_register(ui_cb_t *cb)
+{
+}

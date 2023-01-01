@@ -11,11 +11,11 @@
 #include <stdbool.h>
 
 //获取电量百分比
-uint8_t Battety_Grade_Get();
+uint8_t Battety_Grade_Get(void);
 //获取电压值
-float Battery_Voltage_Get();
+float Battery_Voltage_Get(void);
 //当前是否在充电
-bool Battery_Charge_Get();
+bool Battery_Charge_Get(void);
 
 #endif  //_BATTERY_H_
 

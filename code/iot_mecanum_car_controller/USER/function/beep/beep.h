@@ -8,9 +8,11 @@
 #ifndef _BEEP_H_
 #define _BEEP_H_
 
-void Beep_On_Mu();
+#include <stdint.h>
+
+void Beep_On_Mu(void);
 void Beep_On(uint16_t fre);
-void Beep_Off();
+void Beep_Off(void);
 
 #endif  //_BEEP_H_
 

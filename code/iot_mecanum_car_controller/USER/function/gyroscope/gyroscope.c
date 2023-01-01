@@ -6,3 +6,7 @@
  */
 #include "gyroscope.h"
 
+void gyroscope_attitude_get(float *buff_3float)
+{
+	
+}

@@ -6,5 +6,7 @@
  */
 #include "keyboard.h"
 
-
-
+int keycode_get(void)
+{
+	return 0;
+}
