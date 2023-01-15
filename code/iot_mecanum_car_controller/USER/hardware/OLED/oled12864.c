@@ -73,7 +73,7 @@ static void gpio_init()
 
 static void spi_init(void)
 {
-    MX_SPI1_Init();
+    MX_SPI2_Init();
 }
 
 /**********************************API****************************************************/
