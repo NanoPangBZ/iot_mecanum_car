@@ -8,6 +8,10 @@
 
 #include "usart.h"
 
+//0:空闲 1:在忙
+uint8_t bsp_uart_rx_busy_check(UART_HandleTypeDef* huart);
+uint8_t bsp_uart_tx_busy_check(UART_HandleTypeDef* huart);
+
 /* 异步调用 */
 int bsp_uart_send( UART_HandleTypeDef* huart , uint8_t* data , uint16_t len  );
 int bsp_uart_receive( UART_HandleTypeDef* huart , uint8_t* data , uint16_t len );

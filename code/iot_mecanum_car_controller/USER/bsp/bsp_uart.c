@@ -24,6 +24,24 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
     //todo
 }
 
+uint8_t bsp_uart_rx_busy_check(UART_HandleTypeDef* huart)
+{
+    if( (HAL_UART_GetState( huart ) & HAL_UART_STATE_BUSY_RX)  == HAL_UART_STATE_BUSY_RX )
+    {
+        return 1;
+    }
+    return 0;
+}
+
+uint8_t bsp_uart_tx_busy_check(UART_HandleTypeDef* huart)
+{
+    if( (HAL_UART_GetState( huart ) & HAL_UART_STATE_BUSY_TX)  == HAL_UART_STATE_BUSY_TX )
+    {
+        return 1;
+    }
+    return 0;
+}
+
 int bsp_uart_send( UART_HandleTypeDef* huart , uint8_t* data , uint16_t len  )
 {
     if( (HAL_UART_GetState( huart ) & HAL_UART_STATE_BUSY_TX)  == HAL_UART_STATE_BUSY_TX )
