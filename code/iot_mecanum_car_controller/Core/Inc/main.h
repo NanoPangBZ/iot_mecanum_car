@@ -92,12 +92,10 @@ void Error_Handler(void);
 #define MT4_DIR1_GPIO_Port GPIOC
 #define MT4_DIR2_Pin GPIO_PIN_5
 #define MT4_DIR2_GPIO_Port GPIOC
-#define EX_IO3_Pin GPIO_PIN_0
-#define EX_IO3_GPIO_Port GPIOB
-#define EX_IO2_Pin GPIO_PIN_1
-#define EX_IO2_GPIO_Port GPIOB
-#define EX_IO1_Pin GPIO_PIN_2
-#define EX_IO1_GPIO_Port GPIOB
+#define CHG_STATE_Pin GPIO_PIN_0
+#define CHG_STATE_GPIO_Port GPIOB
+#define BOOT1_Pin GPIO_PIN_2
+#define BOOT1_GPIO_Port GPIOB
 #define OLED_CS_Pin GPIO_PIN_12
 #define OLED_CS_GPIO_Port GPIOB
 #define OLED_SCK_Pin GPIO_PIN_13
@@ -130,6 +128,8 @@ void Error_Handler(void);
 #define HALL3_CHN_GPIO_Port GPIOB
 #define OLED_RES_Pin GPIO_PIN_8
 #define OLED_RES_GPIO_Port GPIOB
+#define ESP_RST_Pin GPIO_PIN_9
+#define ESP_RST_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

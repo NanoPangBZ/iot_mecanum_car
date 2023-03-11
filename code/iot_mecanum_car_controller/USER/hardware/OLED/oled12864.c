@@ -172,31 +172,45 @@ void OLED12864_Clear_Page(uint8_t page)
     OLED12864_Clear_PageBlock(page,0,127);
 }
 
-void OLED12864_Show_Char(uint8_t page,uint8_t x,uint8_t chr,uint8_t size)
+void OLED12864_Show_Char(uint8_t x,uint8_t y,uint8_t chr,uint8_t size)
 {
-    switch(size)
+    uint8_t* offsetAddr = OLED12864_Sbuffer[0] + ( (y/8) * 128 ) + x;
+    uint8_t pageOffset = y%8;
+    uint8_t pageUpOffset = 8 - pageOffset;
+    switch (size)
     {
-        case 1:
-            for(uint8_t temp=0;temp<6;temp++)
-                OLED12864_Sbuffer[page][x+temp] = assic_0806[chr-0x20][temp];
-            break;
-        case 2:
-            //从左至右,从上至下
-            for(uint8_t s_page = 0;s_page<2;s_page++)
-            {
-                for(uint8_t s_x = 0; s_x<8;s_x++)
-                {
-                    OLED12864_Sbuffer[s_page+page][x+s_x] = assic_1608[chr-0x20][s_page*8+s_x];
-                }
-            }
-            break;
-        default:break;
+    case 1:
+        for(uint8_t sx = 0; sx<6 ;sx++){
+            *(offsetAddr) &=  ~(0xff << pageOffset);
+            *(offsetAddr) |=  assic_0806[chr-0x20][sx] << pageOffset;
+            offsetAddr += 128;
+            *(offsetAddr) &=  ~(0xff >> pageUpOffset);
+            *(offsetAddr) |=  assic_0806[chr-0x20][sx] >> pageUpOffset;
+            offsetAddr -= 127;
+        }
+        break;
+    case 2:
+        for(uint8_t sx = 0; sx<8 ;sx++){
+            *(offsetAddr) &=  ~(0xff << pageOffset);
+            *(offsetAddr) |=  (assic_1608[chr-0x20][sx] << pageOffset);
+            offsetAddr += 128;
+            *(offsetAddr) &=  ~0xff ;
+            *(offsetAddr) |=  assic_1608[chr-0x20][sx] >> pageUpOffset;
+            *(offsetAddr) |=  assic_1608[chr-0x20][sx+8] << pageOffset;
+            offsetAddr += 128;
+            *(offsetAddr) &=  ~(0xff >> pageUpOffset);
+            *(offsetAddr) |=  (assic_1608[chr-0x20][sx+8] >> pageUpOffset);
+            offsetAddr -= 255;
+        }
+        break;
+    default:
+        break;
     }
 }
 
 uint8_t  OLED12864_Show_Num(uint8_t page,uint8_t x,int num,uint8_t size)
 {
-    uint8_t sbuf[8];
+    char sbuf[8];
     sprintf((char*)sbuf,"%d",num);
     OLED12864_Show_String(page,x,sbuf,size);
     return 0;
@@ -231,12 +245,12 @@ uint8_t OLED12864_Show_fNum(uint8_t page,uint8_t x,double num,uint8_t size,uint8
     return L_len+1+d_len;
 }
 
-void OLED12864_Show_String(uint8_t page,uint8_t x,uint8_t*str,uint8_t size)
+void OLED12864_Show_String(uint8_t x,uint8_t y,char*str,uint8_t size)
 {
     uint8_t sx = 0;
     while(*str!='\0')
     {
-        OLED12864_Show_Char(page,x+sx,*str,size);
+        OLED12864_Show_Char(x+sx,y,*str,size);
         switch(size)
         {
             case 1:
@@ -269,21 +283,33 @@ void OLED12864_Draw_Point(uint8_t x,uint8_t y,uint8_t bit)
 
 void OLED12864_Draw_Line(uint8_t x1,uint8_t y1,uint8_t x2,uint8_t y2)
 {
-    float sx,sy;
-    float k,k_1;   //斜率
-    k = ((float)y2-y1) / ((float)x2-x1);
-    k_1 = 1/k;
+    float k = (float)(y1 - y2) / (float)(x1 -x2);   //斜率
+    float k_1 = 1 / k;
+
+    float sx = x1;
+    float sy = y1;
+    while( sx != x2){
+        OLED12864_Draw_Point((int)sx,(int)sy,1);
+        if( sx < x2 ){
+            sx ++;
+            sy += k;
+        }else{
+            sx --;
+            sy -= k;
+        }
+    }
+
     sx = x1;
     sy = y1;
-    for(;x1<=x2;x1++)
-    {
-        sy += k;
-        OLED12864_Draw_Point(x1,(int)sy,1);
-    }
-    for(;y1<=y2;y1++)
-    {
-        sx += k_1;
-        OLED12864_Draw_Point((int)sx,y1,1);
+    while( sy != y2 ){
+        OLED12864_Draw_Point((int)sx,(int)sy,1);
+        if( sy < y2 ){
+            sy ++;
+            sx += k_1;
+        }else{
+            sy --;
+            sx -= k_1;
+        }
     }
 }
 
