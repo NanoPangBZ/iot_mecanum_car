@@ -1,29 +1,25 @@
 #ifndef _BSP_GPIO_H_
 #define _BSP_GPIO_H_
 
-#include <stdint.h>
+#include "gpio.h"
 
-#define PIN_MASK( pin_num )             ( 0x01 << pin_num )
-#define PIN_SET( gpio , pin_num )       ( gpio->ODR |= PIN_MASK(pin_num) )
-#define PIN_RESET( gpio , pin_num )     ( gpio->ODR &= ~PIN_MASK(pin_num) )
-#define PIN_READ( gpio , pin_num )      ( ( gpio->ODR & PIN_MASK(pin_num) ) ? 1 : 0 )
-#define PIN_TOGGLE( gpio , pin_num )    PIN_READ( gpio , pin_num ) ? PIN_RESET( gpio , pin_num ) : PIN_SET( gpio , pin_num )
+typedef struct{
+    GPIO_TypeDef* gpio;
+    uint16_t      pin_mask;
+}pin_def;
 
-#define PIN_TICK_LED        0
-#define PIN_MT1_DIR1        1
-#define PIN_MT1_DIR2        2
-#define PIN_MT2_DIR1        3
-#define PIN_MT2_DIR2        4
-#define PIN_MT3_DIR1        5
-#define PIN_MT3_DIR2        6
-#define PIN_MT4_DIR1        7
-#define PIN_MT4_DIR2        8
-#define PIN_ESP32C3_BOOT    9
+extern pin_def bsp_pins[10];
+
+#define PIN_TICK_LED_INDEX  0
+
+#define PIN_SET( pin_index )            ( bsp_pins[pin_index].gpio->ODR |= bsp_pins[pin_index].pin_mask )
+#define PIN_RESET( pin_index )          ( bsp_pins[pin_index].gpio->ODR &= ~bsp_pins[pin_index].pin_mask )
+#define PIN_READ( pin_index )           ( ( bsp_pins[pin_index].gpio->ODR & bsp_pins[pin_index].pin_mask ) ? 1 : 0 )
+#define PIN_TOGGLE( pin_index )         PIN_READ( pin_index ) ? PIN_RESET( pin_index ) : PIN_SET( pin_index )
 
 void bsp_gpio_init();
-
-void bsp_pin_set(  );
-void bsp_pin_reset();
+//设置电机方向
+void bsp_pin_mt_dir_set( uint8_t motor_index , uint8_t dir );
 
 #endif  //_BSP_GPIO_H_
 
