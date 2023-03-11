@@ -8,6 +8,11 @@
 
 #include <stdint.h>
 
+#define MT1_PWM_CHANNLE 0
+#define MT2_PWM_CHANNLE 1
+#define MT3_PWM_CHANNLE 2
+#define MT4_PWM_CHANNLE 3
+
 void bsp_pwm_init( void );
 void bsp_pwm_out( uint8_t channel , uint16_t width );
 void bsp_pwm_all_out( uint16_t* width_4buf );

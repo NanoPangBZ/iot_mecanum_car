@@ -5,9 +5,13 @@
  * @Description: 直流电机
  */
 #include "dc_motor.h"
+#include "bsp_gpio.h"
+#include "bsp_pwm.h"
 
 void dc_motor_output(uint8_t motor_index,int out)
 {
+	bsp_pin_mt_dir_set( motor_index , out > 0 ? 0 : 1 );
+	bsp_pwm_out( motor_index , out > 0 ? out : -out );
 }
 
 void dc_motors_output(int *buff_4int)

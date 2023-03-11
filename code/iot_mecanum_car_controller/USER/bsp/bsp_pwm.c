@@ -7,10 +7,10 @@
 #include "tim.h"
 
 __IO uint32_t* ccr_reg[4] = {
-    &TIM5->CCR1,
-    &TIM5->CCR2,
     &TIM5->CCR3,
     &TIM5->CCR4,
+    &TIM5->CCR1,
+    &TIM5->CCR2
 };
 
 void bsp_pwm_init( void )
