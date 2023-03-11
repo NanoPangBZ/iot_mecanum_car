@@ -2,10 +2,10 @@
 #include "tim.h"
 
 __IO uint32_t* cnt[4] = {
+    &TIM8->CNT,
     &TIM2->CNT,
     &TIM3->CNT,
-    &TIM4->CNT,
-    &TIM8->CNT
+    &TIM4->CNT
 };
 
 void bsp_encoder_init( void )
