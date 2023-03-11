@@ -212,7 +212,7 @@ uint8_t  OLED12864_Show_Num(uint8_t page,uint8_t x,int num,uint8_t size)
 {
     char sbuf[8];
     sprintf((char*)sbuf,"%d",num);
-    OLED12864_Show_String(page,x,sbuf,size);
+    OLED12864_Show_String( x , page*8 , sbuf , 1 );
     return 0;
 }
 
