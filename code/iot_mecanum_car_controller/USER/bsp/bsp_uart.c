@@ -8,22 +8,6 @@
 
 #define DEBUG_LOG(...)
 
-//覆盖weak回调
-//CubeMX生成的代码不管接收(阻塞式除外)方式如何
-//最后都会通过isr调用到这个函数
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-    //todo
-}
-
-//覆盖weak回调
-//CubeMX生成的代码不管发送(阻塞式除外)方式如何
-//最后都会通过isr调用到这个函数
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
-{
-    //todo
-}
-
 uint8_t bsp_uart_rx_busy_check(UART_HandleTypeDef* huart)
 {
     if( (HAL_UART_GetState( huart ) & HAL_UART_STATE_BUSY_RX)  == HAL_UART_STATE_BUSY_RX )

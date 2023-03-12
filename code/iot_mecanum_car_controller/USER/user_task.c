@@ -2,12 +2,9 @@
 
 #include "user_def.h"
 #include "bsp.h"
-
-#include "pid/pid.h"
-#include "mecanum/mecanum.h"
-#include "dc_motor/dc_motor.h"
-#include "vofa_protocol/vofa_protocol.h"
-#include "oled12864.h"
+#include "hardware.h"
+#include "alg.h"
+#include "protocol.h"
 
 #include <math.h>
 
@@ -40,6 +37,38 @@ void speed_pid_test_task( void* param )
         Vofa_Input( pid->Output , 2 );
         Vofa_Send();
         xTaskDelayUntil( &wake_time , 20 / portTICK_PERIOD_MS );
+    }
+}
+
+void uart3_con_uart5(void* param)
+{
+    while(1)
+    {
+        if( UART5->SR & (0x01<<5) )
+        {
+            USART3->DR = UART5->DR;
+            UART5->SR &= ~(0x01<<5);
+        }
+
+        if( USART3->SR & (0x01<<5) )
+        {
+            UART5->DR = USART3->DR;
+            USART3->SR &= ~(0x01<<5);
+        }
+    }
+}
+
+void show_encoder_to_oled(void* param)
+{
+    while(1)
+    {
+        OLED12864_Clear();
+        OLED12864_Show_Num( 0 , 0 , bsp_encoder_get_value(0) , 1 );
+        OLED12864_Show_Num( 1 , 0 , bsp_encoder_get_value(1) , 1 );
+        OLED12864_Show_Num( 2 , 0 , bsp_encoder_get_value(2) , 1 );
+        OLED12864_Show_Num( 3 , 0 , bsp_encoder_get_value(3) , 1 );
+        OLED12864_Show_Num( 5 , 0 , HAL_GetTick()/1000 , 1 );
+        HAL_Delay( 20 );
     }
 }
 
