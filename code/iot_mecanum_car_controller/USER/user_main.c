@@ -11,9 +11,6 @@
 
 #include "vofa_protocol/vofa_protocol.h"
 
-PID_Handle pid;
-
-
 void show_encoder_to_oled()
 {
     // chargeMode();
@@ -38,21 +35,15 @@ void user_main()
     // show_encoder_to_oled();
 	bsp_init();
 
-    pid.P = 28;
-    pid.I = 22;
-    pid.D = 18;
-    pid.out_zoom = 1.f;
-    pid.OutputMax = 65535;
-    pid.OutputMin = -65535;
-    pid.Target = 1500;
+    OLED12864_Init();
 
     xTaskCreate(
-        speed_pid_test_task,
+        move_test_task,
         "test",
         128 , 
-        &pid ,
+        NULL ,
         15 ,
-        &speed_pid_test_taskHandle
+        &test_taskHandle
     );
 
 	vTaskStartScheduler();

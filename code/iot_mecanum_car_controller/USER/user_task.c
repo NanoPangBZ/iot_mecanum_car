@@ -1,17 +1,23 @@
 #include "user_task.h"
 
+#include "user_def.h"
 #include "bsp.h"
+
 #include "pid/pid.h"
+#include "mecanum/mecanum.h"
 #include "dc_motor/dc_motor.h"
 #include "vofa_protocol/vofa_protocol.h"
+#include "oled12864.h"
 
 #include <math.h>
 
+TaskHandle_t test_taskHandle = NULL;
+
 uint8_t test_motore_index = 0;
-TaskHandle_t speed_pid_test_taskHandle = NULL;
 float inc_angle = 0.01;
 float zoom = 500;
 float base = 1500;
+
 /**
  * p  i  d z
  * 28 22 18 1
@@ -37,3 +43,51 @@ void speed_pid_test_task( void* param )
     }
 }
 
+void move_test_task( void* param )
+{
+    mecanum_constant_t model;
+    TickType_t wake_time = xTaskGetTickCount();
+    mecanum_input_t input;
+    mecanum_output_t output;
+    PID_Handle pid[4];
+    float angle = 0.f;
+    // float inc_angle = 0.1f;
+    float base = 400;
+
+    model.wheel_r = 1;
+    model.x_len = 1;
+    model.y_len = 1;
+
+    for( uint8_t temp = 0 ; temp < 4 ; temp++ )
+    {
+        pid[temp].P = SPEED_PID_P;
+        pid[temp].I = SPEED_PID_I;
+        pid[temp].D = SPEED_PID_D;
+        pid[temp].out_zoom = 1.f;
+        pid[temp].OutputMax = 65535;
+        pid[temp].OutputMin = -65535;
+    }
+
+    while(1)
+    {
+        OLED12864_Clear();
+        output.cr_speed = 400;
+        // output.x_speed = sin( angle ) * base ;
+        output.y_speed = 500 ;
+        mecanum_inverse_calculate( &model , &input , &output );
+        for( uint8_t temp = 0 ; temp < 4 ; temp++ )
+        {
+            short speed = bsp_encoder_get_and_clear_value( temp );
+            pid[temp].Target = input[temp];
+            PID_IncOperation( &pid[temp] , speed );
+            dc_motor_output( temp , pid[temp].Output );
+            Vofa_Input( speed , temp );
+            Vofa_Input( pid[temp].Output , temp+4 );
+            OLED12864_Show_Num( temp , 0 , speed , 1 );
+        }
+        angle += inc_angle;
+        OLED12864_Show_Num( 7 , 64 , xTaskGetTickCount()/1000 , 1 );
+        Vofa_Send();
+        xTaskDelayUntil( &wake_time , 20 / portTICK_PERIOD_MS );
+    }
+}
