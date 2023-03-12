@@ -1,58 +1,61 @@
 #include <stdio.h>
+#include <math.h>
 #include "stm32f1xx_hal.h"
 
 #include "bsp.h"
+#include "user_task.h"
+
+#include "pid/pid.h"
 
 #include "oled12864.h"
 
-//os
-#include "FreeRTOS.h"
-#include "task.h"
+#include "vofa_protocol/vofa_protocol.h"
 
-void test_task(void*parm)
+PID_Handle pid;
+
+
+void show_encoder_to_oled()
 {
+    // chargeMode();
+	bsp_init();
+
+    OLED12864_Init();
+
     while(1)
     {
-        // INFO_LOG( __FILE__ , "as" );
-        // vTaskDelay( 1000 / portTICK_PERIOD_MS  );
-        HAL_GPIO_WritePin( TICK_LED_GPIO_Port , TICK_LED_Pin , 0 );
-        vTaskDelay( 80 / portTICK_PERIOD_MS );
-        HAL_GPIO_WritePin( TICK_LED_GPIO_Port , TICK_LED_Pin , 1 );
-        vTaskDelay( 500 / portTICK_PERIOD_MS );
-		OLED12864_Show_String(  0 , 3 , "HelloWorld!" , 2 );
-
+        OLED12864_Clear();
+        OLED12864_Show_Num( 0 , 0 , bsp_encoder_get_value(0) , 1 );
+        OLED12864_Show_Num( 1 , 0 , bsp_encoder_get_value(1) , 1 );
+        OLED12864_Show_Num( 2 , 0 , bsp_encoder_get_value(2) , 1 );
+        OLED12864_Show_Num( 3 , 0 , bsp_encoder_get_value(3) , 1 );
+        OLED12864_Show_Num( 5 , 0 , HAL_GetTick()/1000 , 1 );
+        HAL_Delay( 20 );
     }
 }
 
-TaskHandle_t _handle = NULL;
-
 void user_main()
 {
+    // show_encoder_to_oled();
 	bsp_init();
-    OLED12864_Init();
 
-	HAL_GPIO_WritePin( MT3_DIR1_GPIO_Port , MT3_DIR1_Pin , 0 );
-    HAL_GPIO_WritePin( MT3_DIR2_GPIO_Port , MT3_DIR2_Pin , 1 );
-	bsp_pwm_out( 2 , 10000 );
+    pid.P = 28;
+    pid.I = 22;
+    pid.D = 18;
+    pid.out_zoom = 1.f;
+    pid.OutputMax = 65535;
+    pid.OutputMin = -65535;
+    pid.Target = 1500;
 
-    HAL_GPIO_WritePin( MT4_DIR1_GPIO_Port , MT4_DIR1_Pin , 0 );
-    HAL_GPIO_WritePin( MT4_DIR2_GPIO_Port , MT4_DIR2_Pin , 1 );
-	bsp_pwm_out( 3 , 10000 );
+    xTaskCreate(
+        speed_pid_test_task,
+        "test",
+        128 , 
+        &pid ,
+        15 ,
+        &speed_pid_test_taskHandle
+    );
 
-    HAL_GPIO_WritePin( MT2_DIR1_GPIO_Port , MT2_DIR1_Pin , 0 );
-    HAL_GPIO_WritePin( MT2_DIR2_GPIO_Port , MT2_DIR2_Pin , 1 );
-	bsp_pwm_out( 0 , 10000 );
-
-    HAL_GPIO_WritePin( MT1_DIR1_GPIO_Port , MT1_DIR1_Pin , 0 );
-    HAL_GPIO_WritePin( MT1_DIR2_GPIO_Port , MT1_DIR2_Pin , 1 );
-	bsp_pwm_out( 1 , 10000 );
-
-    while(1)
-    {
-        HAL_Delay( 200 );
-        OLED12864_Clear_Page(0);
-        HAL_GPIO_TogglePin(TICK_LED_GPIO_Port,TICK_LED_Pin);
-        TIM8->CNT = 0;
-    }
+	vTaskStartScheduler();
 	
+    while(1);
 }

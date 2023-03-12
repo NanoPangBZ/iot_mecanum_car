@@ -17,8 +17,6 @@
 float PID_IncOperation(PID_Handle*handle,float Actual)
 {
     float Inc;
-    handle->Err[2] = handle->Err[1];
-    handle->Err[1] = handle->Err[0];
     handle->Err[0] = handle->Target - Actual;
     Inc = handle->P * (handle->Err[0] - handle->Err[1])
          + handle->I * (handle->Err[0])
@@ -28,6 +26,8 @@ float PID_IncOperation(PID_Handle*handle,float Actual)
         handle->Output = handle->OutputMax;
     if(handle->Output < handle->OutputMin)
         handle->Output = handle->OutputMin;
+    handle->Err[2] = handle->Err[1];
+    handle->Err[1] = handle->Err[0];
     return handle->Output;
 }
 

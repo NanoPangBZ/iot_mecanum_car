@@ -8,6 +8,8 @@ __IO uint32_t* cnt[4] = {
     &TIM4->CNT
 };
 
+static uint8_t encoder_dir[4] = { 0 , 1 , 0 , 1 };
+
 void bsp_encoder_init( void )
 {
     HAL_TIM_Encoder_Start( &htim2 , TIM_CHANNEL_ALL );
@@ -22,7 +24,7 @@ short bsp_encoder_get_value( uint8_t channel )
         return 0;
         
     short re = *cnt[channel];
-    return re;
+    return encoder_dir[ channel ] ? -re : re;
 }
 
 void bsp_encoder_clear( uint8_t channel )
@@ -39,6 +41,6 @@ short bsp_encoder_get_and_clear_value( uint8_t channel )
 
     short re = *cnt[channel];
     *cnt[channel] = 0;
-    return re;
+    return encoder_dir[ channel ] ? -re : re;
 }
 
