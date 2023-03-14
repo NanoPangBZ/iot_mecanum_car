@@ -110,8 +110,8 @@ void Error_Handler(void);
 #define HALL4_CHN_GPIO_Port GPIOC
 #define TICK_LED_Pin GPIO_PIN_8
 #define TICK_LED_GPIO_Port GPIOC
-#define DEBUG_LED_Pin GPIO_PIN_9
-#define DEBUG_LED_GPIO_Port GPIOC
+#define ESP_BOOT_Pin GPIO_PIN_9
+#define ESP_BOOT_GPIO_Port GPIOC
 #define BEEP_PWM_Pin GPIO_PIN_8
 #define BEEP_PWM_GPIO_Port GPIOA
 #define HALL1_CH_Pin GPIO_PIN_15

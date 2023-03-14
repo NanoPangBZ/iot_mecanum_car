@@ -12,7 +12,8 @@ pin_def bsp_pins[11] =
     { GPIOA , GPIO_PIN_7 },
     { GPIOC , GPIO_PIN_4 },
     { GPIOC , GPIO_PIN_5 },
-    { GPIOB , GPIO_PIN_9 }
+    { GPIOB , GPIO_PIN_9 },
+    { GPIOC , GPIO_PIN_9 }
 };
 
 //4个电机方向控制引脚在bsp_pin数组中的索引

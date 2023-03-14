@@ -54,7 +54,7 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, MT1_DIR1_Pin|MT1_DIR2_Pin|MT4_DIR1_Pin|MT4_DIR2_Pin
-                          |TICK_LED_Pin|DEBUG_LED_Pin, GPIO_PIN_RESET);
+                          |TICK_LED_Pin|ESP_BOOT_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, MT2_DIR1_Pin|MT2_DIR2_Pin|MT3_DIR1_Pin|MT3_DIR2_Pin, GPIO_PIN_RESET);
@@ -71,7 +71,7 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pins : PCPin PCPin PCPin PCPin
                            PCPin PCPin */
   GPIO_InitStruct.Pin = MT1_DIR1_Pin|MT1_DIR2_Pin|MT4_DIR1_Pin|MT4_DIR2_Pin
-                          |TICK_LED_Pin|DEBUG_LED_Pin;
+                          |TICK_LED_Pin|ESP_BOOT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

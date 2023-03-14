@@ -123,11 +123,13 @@ void move_test_task( void* param )
 
 void sys_led_tick(void* param)
 {
+    // ESP32_ENABLE();
     while(1)
     {
         LED_OFF();
         vTaskDelay( 800 / portTICK_PERIOD_MS );
         LED_ON();
+        OLED12864_Show_Num( 7 , 64 , xTaskGetTickCount()/1000 , 1 );
         vTaskDelay( 60 / portTICK_PERIOD_MS );
     }
 }

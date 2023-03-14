@@ -13,7 +13,11 @@ void user_main()
 {
 	bsp_init();
 
-    ESP32_ENABLE();
+    OLED12864_Init();
+
+    PIN_SET( PIN_ESP32_BOOT_INDEX );
+    HAL_Delay(50);
+    PIN_SET( PIN_ESP32_ENABLE_INDEX );
 
     xTaskCreate(
         sys_led_tick,
