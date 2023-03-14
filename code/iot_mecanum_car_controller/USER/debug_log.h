@@ -14,13 +14,13 @@
 #define ENABLE_INFO_LOG     (1)
 
 #if ENABLE_ERROR_LOG
-#define ERROR_LOG(tag,...)  log_printf( "***[err]-[" tag "]:" __VA_ARGS__ )
+#define ERROR_LOG(tag,...)  log_printf( "[err]-[" tag "]:" __VA_ARGS__ )
 #else
 #define ERROR_LOG(tag,...)
 #endif
 
 #if ENABLE_WARN_LOG
-#define WARN_LOG(tag,...)   log_printf( "---[warn]-[" tag "]:" __VA_ARGS__ )
+#define WARN_LOG(tag,...)   log_printf( "[warn]-[" tag "]:" __VA_ARGS__ )
 #else
 #define ERROR_LOG(tag,...)
 #endif

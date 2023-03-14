@@ -1,7 +1,7 @@
 #include "bsp_gpio.h"
 
 //GPIO列表
-pin_def bsp_pins[10] = 
+pin_def bsp_pins[11] = 
 {
     { GPIOC , GPIO_PIN_8 },
     { GPIOC , GPIO_PIN_2 },
@@ -11,7 +11,8 @@ pin_def bsp_pins[10] =
     { GPIOA , GPIO_PIN_6 },
     { GPIOA , GPIO_PIN_7 },
     { GPIOC , GPIO_PIN_4 },
-    { GPIOC , GPIO_PIN_5 }
+    { GPIOC , GPIO_PIN_5 },
+    { GPIOB , GPIO_PIN_9 }
 };
 
 //4个电机方向控制引脚在bsp_pin数组中的索引

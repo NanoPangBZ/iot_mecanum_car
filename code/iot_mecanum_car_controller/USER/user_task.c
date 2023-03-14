@@ -120,3 +120,14 @@ void move_test_task( void* param )
         xTaskDelayUntil( &wake_time , 20 / portTICK_PERIOD_MS );
     }
 }
+
+void sys_led_tick(void* param)
+{
+    while(1)
+    {
+        LED_OFF();
+        vTaskDelay( 800 / portTICK_PERIOD_MS );
+        LED_ON();
+        vTaskDelay( 60 / portTICK_PERIOD_MS );
+    }
+}

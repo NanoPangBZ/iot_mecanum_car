@@ -5,6 +5,7 @@
 #include "bsp.h"
 #include "hardware.h"
 #include "alg.h"
+#include "protocol.h"
 
 #include "user_task.h"
 
@@ -12,14 +13,16 @@ void user_main()
 {
 	bsp_init();
 
-    // xTaskCreate(
-    //     move_test_task,
-    //     "test",
-    //     128 , 
-    //     NULL ,
-    //     15 ,
-    //     &test_taskHandle
-    // );
+    ESP32_ENABLE();
+
+    xTaskCreate(
+        sys_led_tick,
+        "test",
+        64 , 
+        NULL ,
+        1 ,
+        &test_taskHandle
+    );
 
 	vTaskStartScheduler();
 

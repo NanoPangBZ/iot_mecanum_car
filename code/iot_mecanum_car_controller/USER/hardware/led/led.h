@@ -9,13 +9,7 @@
 
 #include <stdint.h>
 
-typedef enum
-{
-	TICK_LED = 0,
-	DEBUG_LED = 1
-}led_t;
 
-void led(led_t led,uint8_t onoff);
 
 #endif  //_LED_H_
 

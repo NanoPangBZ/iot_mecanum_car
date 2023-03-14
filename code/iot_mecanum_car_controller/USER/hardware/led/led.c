@@ -5,7 +5,4 @@
  * @Description: led灯
  */
 #include "led.h"
-
-void led(led_t led,uint8_t onoff)
-{
-}
+#include "bsp.h"
