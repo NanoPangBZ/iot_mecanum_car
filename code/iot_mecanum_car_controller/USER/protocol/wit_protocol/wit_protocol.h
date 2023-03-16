@@ -1,12 +1,13 @@
 #ifndef _WIT_PROTOCOL_H_
 #define _WIT_PROTOCOL_H_
 
-//不支持多设备
-
 #include <stdint.h>
 
-void wit_protocol_machine_reset( void );
-void wit_protocol_machine( uint8_t byte );
+#define WIT_TYPE_ACC
+#define WIT_TYPE_ANG
+#define WIT_TYPE_MEG
 
-#endif  //_WIT_PROTOCOL_H_
+void wit_protocol_machine_input( uint8_t data );
+
+#endif		//_WIT_PROTOCOL_H_
 

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
 #include "stm32f1xx_hal.h"
 
@@ -8,6 +9,8 @@
 #include "protocol.h"
 
 #include "user_task.h"
+
+float yaw;
 
 void user_main()
 {
@@ -19,16 +22,10 @@ void user_main()
     HAL_Delay(50);
     PIN_SET( PIN_ESP32_ENABLE_INDEX );
 
-    xTaskCreate(
-        sys_led_tick,
-        "test",
-        64 , 
-        NULL ,
-        1 ,
-        &test_taskHandle
-    );
-
-	vTaskStartScheduler();
-
-    while(1);
+    while(1)
+    {
+        OLED12864_Clear_Page(0);
+        OLED12864_Show_Num( 0 , 0 , yaw , 1 );
+        HAL_Delay( 100 );
+    }    
 }

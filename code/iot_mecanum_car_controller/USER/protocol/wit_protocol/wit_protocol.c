@@ -1,71 +1,54 @@
-#include <string.h>
 #include "wit_protocol.h"
+#include <string.h>
 
-#define PROTOCOL_HEAD       0x55
-#define PROTOCOL_TYPE_ACC   0x51    //加速度
-#define PROTOCOL_TYPE_PAL   0x52    //角速度
-#define PROTOCOL_TYPE_ANG   0x53    //角度
-#define PROTOCOL_TYPE_MAG   0x54    //磁场
+#define WIT_DATA_BUFF_SIZE  64
 
-static uint8_t machine_state = 0;
+static uint8_t s_ucWitDataBuff[ WIT_DATA_BUFF_SIZE ];
+static uint8_t s_uiWitDataCnt = 0;
 
-static uint8_t decoder_buf[8];
-static uint8_t buf_len = 0;
-static uint8_t crc_value = 0;
-
-__attribute__((weak)) void wit_protocol_callback( uint8_t type_byte , const uint8_t* data_buf )
+__attribute__((weak)) void wit_protocol_respond( uint8_t type,  uint16_t* t_4_uint16 )
 {
 
 }
 
-static void wit_protocol_error_handler( void )
+static uint8_t __CaliSum(uint8_t *data, uint32_t len)
 {
-    //寻找下一个HEAD
-    uint8_t header = 0;
-    for(  header = 0 ; ( header < 8 ) && ( decoder_buf[ header ] == PROTOCOL_HEAD ) ; header++  );
-    if( decoder_buf[header] == PROTOCOL_HEAD )
-        //重新解析
-        for( uint8_t temp = header ; temp < 8 ; temp++ )
-            wit_protocol_machine( decoder_buf[temp] );
-    return;
+    uint32_t i;
+    uint8_t ucCheck = 0;
+    for(i=0; i<len; i++) ucCheck += *(data + i);
+    return ucCheck;
 }
 
-void wit_protocol_machine( uint8_t byte )
+void wit_protocol_machine_input( uint8_t data )
 {
-    switch( machine_state )
+    uint16_t usCRC16, usTemp, i, usData[4];
+    uint8_t ucSum;
+
+    s_ucWitDataBuff[s_uiWitDataCnt++] = data;
+    if(s_ucWitDataBuff[0] != 0x55)
     {
-        //头捕获
-        case 0:
-            if( byte == PROTOCOL_HEAD )
-            {
-                crc_value = byte;
-                machine_state++;
-            }
-        break;
-
-        //等待完整数据 类型 + 数据
-        case 1:
-            decoder_buf[ buf_len ] = byte;
-            crc_value += byte;
-            buf_len++;
-            machine_state++;
-        break;
-            
-        //校验
-        case 2:
-            if( crc_value != byte )
-            {
-                wit_protocol_error_handler( );
-            }else{
-                wit_protocol_callback( decoder_buf[0] , decoder_buf + 1 );
-            }
-            wit_protocol_machine_reset();
-        break;
+        s_uiWitDataCnt--;
+        memcpy(s_ucWitDataBuff, &s_ucWitDataBuff[1], s_uiWitDataCnt);
+        return ;
     }
-}
 
-void wit_protocol_machine_reset( void )
-{
-    crc_value = 0;
-    buf_len = 0;
+    if(s_uiWitDataCnt >= 11)
+    {
+        ucSum = __CaliSum(s_ucWitDataBuff, 10);
+        if(ucSum != s_ucWitDataBuff[10])
+        {
+            s_uiWitDataCnt--;
+            memcpy(s_ucWitDataBuff, &s_ucWitDataBuff[1], s_uiWitDataCnt);
+            return ;
+        }
+        usData[0] = ((uint16_t)s_ucWitDataBuff[3] << 8) | (uint16_t)s_ucWitDataBuff[2];
+        usData[1] = ((uint16_t)s_ucWitDataBuff[5] << 8) | (uint16_t)s_ucWitDataBuff[4];
+        usData[2] = ((uint16_t)s_ucWitDataBuff[7] << 8) | (uint16_t)s_ucWitDataBuff[6];
+        usData[3] = ((uint16_t)s_ucWitDataBuff[9] << 8) | (uint16_t)s_ucWitDataBuff[8];
+        wit_protocol_respond( s_ucWitDataBuff[1] , usData );
+        //CopeWitData(s_ucWitDataBuff[1], usData, 4);
+        s_uiWitDataCnt = 0;
+    }
+
+    if(s_uiWitDataCnt == WIT_DATA_BUFF_SIZE)s_uiWitDataCnt = 0;
 }

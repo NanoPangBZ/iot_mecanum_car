@@ -20,6 +20,9 @@ int bsp_uart_receive( UART_HandleTypeDef* huart , uint8_t* data , uint16_t len )
 int bsp_uart_send_block( UART_HandleTypeDef* huart , uint8_t* data , uint16_t len , uint16_t timeout );
 int bsp_uart_receive_block( UART_HandleTypeDef* huart , uint8_t* data , uint16_t len , uint16_t timeout );
 
+//启动缓存式接收
+void bsp_uart_start_rx_buff_mode( void );
+
 #if 0
 /* 缓存式收发 */
 int bsp_uart_set_tx_sbuffer( UART_HandleTypeDef* huart , uint8_t* data , uint16_t len);

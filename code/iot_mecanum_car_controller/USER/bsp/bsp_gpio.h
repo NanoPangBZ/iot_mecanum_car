@@ -21,6 +21,7 @@ extern pin_def bsp_pins[11];
 
 #define LED_ON()    PIN_RESET( PIN_TICK_LED_INDEX )
 #define LED_OFF()   PIN_SET( PIN_TICK_LED_INDEX )
+#define LED_TOGGLE()  PIN_TOGGLE( PIN_TICK_LED_INDEX )
 
 void bsp_gpio_init();
 //设置电机方向
