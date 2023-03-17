@@ -12,5 +12,7 @@
 #include "./keyboard/keyboard.h"
 #include "./led/led.h"
 
+void hardware_init(void);
+
 #endif  //_FUNCTION_H_
 
