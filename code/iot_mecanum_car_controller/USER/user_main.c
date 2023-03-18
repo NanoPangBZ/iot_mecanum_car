@@ -8,6 +8,8 @@
 #include "alg.h"
 #include "protocol.h"
 
+#include "motion_control.h"
+
 #include "FreeRTOS.h"
 #include "task.h"
 
@@ -21,9 +23,22 @@ void sys_led_tick(void* param)
         LED_OFF();
         vTaskDelay( 800 / portTICK_PERIOD_MS );
         LED_ON();
-        OLED12864_Show_Num( 7 , 64 , xTaskGetTickCount()/1000 , 1 );
         vTaskDelay( 60 / portTICK_PERIOD_MS );
     }
+}
+
+static void start_task( void* param )
+{
+    xTaskCreate( 
+        sys_led_tick ,
+        "sys_led",
+        32,
+        NULL,
+        1,
+        &led_taskHandle
+    );
+    motion_control_start();
+    vTaskDelete( NULL );
 }
 
 void user_main()
@@ -32,11 +47,11 @@ void user_main()
     hardware_init();
 
     xTaskCreate( 
-        sys_led_tick ,
-        "sys_led",
-        64,
+        start_task ,
+        "sys_start",
+        128,
         NULL,
-        1,
+        15,
         &led_taskHandle
     );
 
