@@ -6,7 +6,7 @@
 static uint8_t s_ucWitDataBuff[ WIT_DATA_BUFF_SIZE ];
 static uint8_t s_uiWitDataCnt = 0;
 
-__attribute__((weak)) void wit_protocol_respond( uint8_t type,  uint16_t* t_4_uint16 )
+__attribute__((weak)) void wit_protocol_callback( uint8_t type,  uint16_t* t_4_uint16 )
 {
 
 }
@@ -45,7 +45,7 @@ void wit_protocol_machine_input( uint8_t data )
         usData[1] = ((uint16_t)s_ucWitDataBuff[5] << 8) | (uint16_t)s_ucWitDataBuff[4];
         usData[2] = ((uint16_t)s_ucWitDataBuff[7] << 8) | (uint16_t)s_ucWitDataBuff[6];
         usData[3] = ((uint16_t)s_ucWitDataBuff[9] << 8) | (uint16_t)s_ucWitDataBuff[8];
-        wit_protocol_respond( s_ucWitDataBuff[1] , usData );
+        wit_protocol_callback( s_ucWitDataBuff[1] , usData );
         //CopeWitData(s_ucWitDataBuff[1], usData, 4);
         s_uiWitDataCnt = 0;
     }

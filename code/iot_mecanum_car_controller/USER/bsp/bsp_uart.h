@@ -8,6 +8,8 @@
 
 #include "usart.h"
 
+void bsp_uart_init( void );
+
 //0:空闲 1:在忙
 uint8_t bsp_uart_rx_busy_check(UART_HandleTypeDef* huart);
 uint8_t bsp_uart_tx_busy_check(UART_HandleTypeDef* huart);
@@ -19,9 +21,6 @@ int bsp_uart_receive( UART_HandleTypeDef* huart , uint8_t* data , uint16_t len )
 /* 同步调用 */
 int bsp_uart_send_block( UART_HandleTypeDef* huart , uint8_t* data , uint16_t len , uint16_t timeout );
 int bsp_uart_receive_block( UART_HandleTypeDef* huart , uint8_t* data , uint16_t len , uint16_t timeout );
-
-//启动缓存式接收
-void bsp_uart_start_rx_buff_mode( void );
 
 #if 0
 /* 缓存式收发 */

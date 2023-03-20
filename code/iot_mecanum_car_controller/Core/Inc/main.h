@@ -66,8 +66,6 @@ void Error_Handler(void);
 #define HALL4_TIM htim8
 #define BAT_ADC_Pin GPIO_PIN_0
 #define BAT_ADC_GPIO_Port GPIOC
-#define KEY_ADC_Pin GPIO_PIN_1
-#define KEY_ADC_GPIO_Port GPIOC
 #define MT1_DIR1_Pin GPIO_PIN_2
 #define MT1_DIR1_GPIO_Port GPIOC
 #define MT1_DIR2_Pin GPIO_PIN_3

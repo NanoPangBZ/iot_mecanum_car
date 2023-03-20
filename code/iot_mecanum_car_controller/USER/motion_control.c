@@ -1,6 +1,7 @@
 #include "motion_control.h"
 
 #include "user_def.h"
+#include "isr.h"
 #include "bsp.h"
 #include "hardware.h"
 #include "alg.h"
@@ -9,7 +10,6 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-extern float yaw;                   //当前陀螺仪航向角 -> 由ISR处理
 static float programe_yaw_ofs;      //程序参考坐标系相对陀螺仪的偏移
 static float target_yaw = 0;        //目标航向角 -> 程序参考坐标系
 static float target_position[2];    //目标位置 -> 程序参考坐标系
@@ -71,7 +71,7 @@ static void yaw_control_task( void* param )
     while(1)
     {
         //将目标航向角转话为相对当前小车的角度
-        err_yaw = target_yaw - ( yaw + programe_yaw_ofs );
+        err_yaw = target_yaw - ( jy901s_yaw + programe_yaw_ofs );
         if( err_yaw > 360 ) err_yaw -= 360;
         if( err_yaw < -360) err_yaw += 360;
 
@@ -88,7 +88,7 @@ static void yaw_control_task( void* param )
 
 void motion_control_start()
 {
-    programe_yaw_ofs = -yaw;
+    programe_yaw_ofs = -jy901s_yaw;
 
     xTaskCreate(
         car_speed_control_task,
@@ -111,10 +111,10 @@ void motion_control_start()
 
 float motion_get_yaw()
 {
-    return yaw + programe_yaw_ofs;
+    return jy901s_yaw + programe_yaw_ofs;
 }
 
 void motion_reset_yaw()
 {
-    programe_yaw_ofs = -yaw;
+    programe_yaw_ofs = -jy901s_yaw;
 }
