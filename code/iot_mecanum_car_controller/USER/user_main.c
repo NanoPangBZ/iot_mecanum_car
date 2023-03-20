@@ -47,14 +47,12 @@ void user_main()
 	bsp_init();
     hardware_init();
 
-    OLED12864_Show_String( 0 , 0 , "HelloWorld!" , 1 );
-
 	while(1)
 	{
-		HAL_ADC_Start( &hadc3 );
-        while( HAL_ADC_GetState( &hadc3 ) == HAL_BUSY );
         OLED12864_Clear_Page( 0 );
-        OLED12864_Show_Num( 0 , 0 , HAL_ADC_GetValue( &hadc3 ) , 1 );
+        OLED12864_Show_Num( 0 , 0 , adc2_value , 1 );
+        OLED12864_Show_Num( 1 , 0 , adc3_value , 1 );
+        HAL_Delay( 30 );
 	}
 	
     xTaskCreate( 

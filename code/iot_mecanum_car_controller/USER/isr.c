@@ -1,5 +1,7 @@
 #include "stm32f1xx_hal.h"
 
+#include "adc.h"
+
 #include "bsp.h"
 #include "protocol.h"
 
@@ -16,6 +18,10 @@ uint8_t u5_rx;
 
 //JY901S解析出的yaw值
 float jy901s_yaw;
+
+//ADC值
+uint16_t adc2_value;
+uint16_t adc3_value;
 
 //覆盖wit_protocol中的weak回调
 void wit_protocol_callback( uint8_t type , uint16_t* t_4_uint16 )
@@ -67,4 +73,12 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
+    if( hadc == &hadc2 )
+    {
+        adc2_value = HAL_ADC_GetValue( &hadc2 );
+        HAL_ADC_Start_IT( &hadc2 );
+    }else{
+        adc3_value = HAL_ADC_GetValue( hadc );
+        HAL_ADC_Start_IT( &hadc3 );
+    }
 }
