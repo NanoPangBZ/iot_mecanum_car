@@ -9,8 +9,8 @@
 
 #include "./oled/oled12864.h"
 #include "./dc_motor/dc_motor.h"
-#include "./keyboard/keyboard.h"
 #include "./led/led.h"
+#include "./adc_keyboard/adc_keyboard.h"
 
 void hardware_init(void);
 
