@@ -10,11 +10,10 @@
 #include "protocol.h"
 
 #include "motion_control.h"
+#include "hmi.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
-
-#include "adc.h"
 
 static TaskHandle_t led_taskHandle;
 void sys_led_tick(void* param)
@@ -39,6 +38,7 @@ static void start_task( void* param )
         &led_taskHandle
     );
     motion_control_start();
+    hmi_start();
     vTaskDelete( NULL );
 }
 
@@ -47,14 +47,6 @@ void user_main()
 	bsp_init();
     hardware_init();
 
-	while(1)
-	{
-        OLED12864_Clear_Page( 0 );
-        OLED12864_Show_Num( 0 , 0 , get_keycode() , 1 );
-		OLED12864_Show_Num( 1 , 0 , adc3_value , 1 );
-        HAL_Delay( 30 );
-	}
-	
     xTaskCreate( 
         start_task ,
         "sys_start",

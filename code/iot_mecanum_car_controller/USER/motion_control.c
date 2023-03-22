@@ -88,7 +88,9 @@ static void yaw_control_task( void* param )
 
 void motion_control_start()
 {
-    programe_yaw_ofs = -jy901s_yaw;
+    if( _car_speed_taskHandle || _yaw_control_taskHanle ) return;
+
+    programe_yaw_ofs = jy901s_yaw;
 
     xTaskCreate(
         car_speed_control_task,
@@ -111,10 +113,32 @@ void motion_control_start()
 
 float motion_get_yaw()
 {
+    float re = jy901s_yaw - programe_yaw_ofs;
+    if( re >= 180 ) re -= 360;
+    if( re <= -180 ) re += 360;
     return jy901s_yaw + programe_yaw_ofs;
 }
 
 void motion_reset_yaw()
 {
-    programe_yaw_ofs = -jy901s_yaw;
+    programe_yaw_ofs = jy901s_yaw;
+}
+
+void motion_control_suspend( void )
+{
+    if( _car_speed_taskHandle ) vTaskSuspend( _car_speed_taskHandle );
+    if( _yaw_control_taskHanle ) vTaskSuspend( _yaw_control_taskHanle );
+}
+
+void motion_control_resume( void )
+{
+    if( _car_speed_taskHandle )
+    {
+        vTaskResume( _car_speed_taskHandle );
+    }
+
+    if( _yaw_control_taskHanle )
+    {
+        vTaskResume( _yaw_control_taskHanle );
+    }
 }
