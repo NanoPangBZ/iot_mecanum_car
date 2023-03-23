@@ -52,7 +52,7 @@ static void car_speed_control_task( void* param )
         }
 
         //通过实际轮子速度计算小车速度 对其积分 计算位移
-        mecanum_positive_calculate( &model , &wheel_speed , &car_posi_speed );
+        // mecanum_positive_calculate( &model , &wheel_speed , &car_posi_speed );
         //将小车的速度矢量转化到程序参考坐标系
         //todo
 
@@ -67,14 +67,10 @@ static void yaw_control_task( void* param )
     PID_Handle yaw_pid = { 7.2 , 0 , 0.02 , 1.0 , 0 , 0 , { 0 , 0 , 0  } , 1000 , -1000 };
     float threshold;
     float err_yaw ;
-    yaw_pid.Target = 0;
+    yaw_pid.Target = 0; //目标值始终为0
     while(1)
     {
-        //将目标航向角转话为相对当前小车的角度
-        err_yaw = target_yaw - ( jy901s_yaw + programe_yaw_ofs );
-        if( err_yaw > 360 ) err_yaw -= 360;
-        if( err_yaw < -360) err_yaw += 360;
-
+        err_yaw = target_yaw - motion_get_yaw();
         //机动过程中偏差大于0.5°时才开始修正航向角
         //待机状态下偏差大于2°时才开始修正航向角
         threshold = motion_state ? 0.5 : 2;
@@ -90,7 +86,7 @@ void motion_control_start()
 {
     if( _car_speed_taskHandle || _yaw_control_taskHanle ) return;
 
-    programe_yaw_ofs = jy901s_yaw;
+    motion_reset_yaw();
 
     xTaskCreate(
         car_speed_control_task,
@@ -113,15 +109,17 @@ void motion_control_start()
 
 float motion_get_yaw()
 {
-    float re = jy901s_yaw - programe_yaw_ofs;
+    float re = jy901s_yaw + programe_yaw_ofs;
     if( re >= 180 ) re -= 360;
     if( re <= -180 ) re += 360;
-    return jy901s_yaw + programe_yaw_ofs;
+    return re;
 }
 
 void motion_reset_yaw()
 {
-    programe_yaw_ofs = jy901s_yaw;
+    programe_yaw_ofs = -jy901s_yaw;
+    if( programe_yaw_ofs <= -180 )
+        programe_yaw_ofs += 360;
 }
 
 void motion_control_suspend( void )
