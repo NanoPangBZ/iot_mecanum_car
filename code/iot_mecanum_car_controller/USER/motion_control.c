@@ -10,6 +10,9 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#define WHELL_SPEED_MIN 100
+#define WHELL_SPEED_MAX 3000
+
 static float programe_yaw_ofs;      //程序参考坐标系相对陀螺仪的偏移
 static float target_yaw = 0;        //目标航向角 -> 程序参考坐标系
 static float target_position[2];    //目标位置 -> 程序参考坐标系
@@ -44,10 +47,20 @@ static void car_speed_control_task( void* param )
         mecanum_inverse_calculate( &model , &wheel_speed , &car_target_speed );
         for( uint8_t temp = 0; temp < 4; temp++ )
         {
+            //获取当前速度
             encoder_speed = bsp_encoder_get_and_clear_value(temp);
-            pid[temp].Target = wheel_speed[temp];
-            PID_IncOperation( &pid[temp] , encoder_speed );
-            dc_motor_output( temp , pid[temp].Output );
+
+            if( wheel_speed[temp] < WHELL_SPEED_MIN && wheel_speed[temp] > -WHELL_SPEED_MIN )
+            {
+                pid[temp].Target = 0;
+                dc_motor_output( temp , 0 );
+            }else
+            {
+                pid[temp].Target = wheel_speed[temp];
+                PID_IncOperation( &pid[temp] , encoder_speed );
+                dc_motor_output( temp , pid[temp].Output );
+            }
+            
             wheel_speed[temp] = encoder_speed;  //记录实际速度 用于开环速度积分
         }
 
@@ -64,7 +77,7 @@ static TaskHandle_t _yaw_control_taskHanle = NULL;
 static void yaw_control_task( void* param )
 {
     TickType_t time = xTaskGetTickCount();
-    PID_Handle yaw_pid = { 7.2 , 0 , 0.02 , 1.0 , 0 , 0 , { 0 , 0 , 0  } , 1000 , -1000 };
+    PID_Handle yaw_pid = { 7.2 , 0.01 , 0.02 , 1.0 , 0 , 0 , { 0 , 0 , 0  } , 1000 , -1000 };
     float threshold;
     float err_yaw ;
     yaw_pid.Target = 0; //目标值始终为0
@@ -73,11 +86,11 @@ static void yaw_control_task( void* param )
         err_yaw = target_yaw - motion_get_yaw();
         //机动过程中偏差大于0.5°时才开始修正航向角
         //待机状态下偏差大于2°时才开始修正航向角
-        threshold = motion_state ? 0.5 : 2;
+        threshold = motion_state ? 2 : 0.5;
         if( err_yaw < motion_state && err_yaw > -motion_state ) err_yaw = 0;
         else    PID_IncOperation( &yaw_pid , err_yaw );
 
-        car_target_speed.cr_speed = -yaw_pid.Output;
+        car_target_speed.cr_speed = yaw_pid.Output;
         vTaskDelayUntil( &time , 50 / portTICK_PERIOD_MS );
     }
 }
