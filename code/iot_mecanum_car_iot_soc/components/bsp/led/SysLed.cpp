@@ -43,7 +43,7 @@ void SysLed::stop()
 {
     if( _ledTaskHandle )
     {
-        vTaskDelete( &_ledTaskHandle );
+        vTaskDelete( _ledTaskHandle );
         _ledTaskHandle = NULL;
     }
 }

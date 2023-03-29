@@ -9,4 +9,5 @@ set( BSP_DIRS   "."
                 "save")
 
 idf_component_register(SRCS ${BSP_SRCS}
-                    INCLUDE_DIRS ${BSP_DIRS})
+                    INCLUDE_DIRS ${BSP_DIRS}
+                    REQUIRES driver nvs_flash )
