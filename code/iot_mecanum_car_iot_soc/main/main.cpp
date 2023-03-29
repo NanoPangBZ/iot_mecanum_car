@@ -14,10 +14,11 @@
 
 #include "bsp.h"
 
-static const char *TAG = "main";
+#define TAG "main"
 
 extern "C" void app_main(void)
 {
+    ESP_LOGI( TAG , "App run." );
     SysLed::sysLed.setFre( 1 , 50 );
     SysLed::sysLed.start();
 }

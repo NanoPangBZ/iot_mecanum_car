@@ -11,20 +11,19 @@ SysLed SysLed::sysLed;
 
 void SysLed::ledTask( void* param )
 {
-    TickType_t time = xTaskGetTickCount();
-    gpio_reset_pin( SysLedGpio );
-    gpio_set_direction( SysLedGpio , GPIO_MODE_OUTPUT );
     while(1)
     {
         gpio_set_level( SysLedGpio , 0 );
         vTaskDelay( SysLed::sysLed._onMs / portTICK_PERIOD_MS );
         gpio_set_level( SysLedGpio , 1 );
-        vTaskDelayUntil( &time , SysLed::sysLed._cycle / portTICK_PERIOD_MS );
+        vTaskDelay( SysLed::sysLed._offMs / portTICK_PERIOD_MS );
     }
 }
 
 void SysLed::start()
 {
+    gpio_reset_pin( SysLedGpio );
+    gpio_set_direction( SysLedGpio , GPIO_MODE_OUTPUT );
     if( !_ledTaskHandle )
     {
         xTaskCreatePinnedToCore(
@@ -51,5 +50,5 @@ void SysLed::stop()
 void SysLed::setFre( float fre , uint8_t onMs )
 {
     _onMs = onMs;
-    _cycle = 1000 / fre - onMs;
+    _offMs = 1000 / fre - onMs;
 }

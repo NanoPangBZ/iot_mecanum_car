@@ -12,7 +12,7 @@ public:
 private:
     SysLed(){};
     static void ledTask(void* param);
-    uint16_t _cycle;
+    uint16_t _offMs;
     uint8_t  _onMs;
 };
 
