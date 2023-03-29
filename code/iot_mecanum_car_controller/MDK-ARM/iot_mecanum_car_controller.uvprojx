@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xE,STM32_THREAD_SAFE_STRATEGY=2</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../USB_DEVICE/App;../USB_DEVICE/Target;../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;../OS;../OS/include;../OS/portable;../USER;..\USER\bsp;..\USER\hardware;..\USER\hardware;..\USER\alg;..\USER\protocol</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../USB_DEVICE/App;../USB_DEVICE/Target;../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;../OS;../OS/include;../OS/portable;../USER;..\USER\bsp;..\USER\hardware;..\USER\hardware;..\USER\alg;..\USER\protocol;..\USER\task</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -400,16 +400,6 @@
               <FilePath>..\USER\FreeRTOSConfig.h</FilePath>
             </File>
             <File>
-              <FileName>hmi.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\USER\hmi.c</FilePath>
-            </File>
-            <File>
-              <FileName>hmi.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\USER\hmi.h</FilePath>
-            </File>
-            <File>
               <FileName>isr.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\USER\isr.c</FilePath>
@@ -418,16 +408,6 @@
               <FileName>isr.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\USER\isr.h</FilePath>
-            </File>
-            <File>
-              <FileName>motion_control.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\USER\motion_control.c</FilePath>
-            </File>
-            <File>
-              <FileName>motion_control.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\USER\motion_control.h</FilePath>
             </File>
             <File>
               <FileName>user_def.c</FileName>
@@ -443,6 +423,31 @@
               <FileName>user_main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\USER\user_main.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>TASK</GroupName>
+          <Files>
+            <File>
+              <FileName>hmi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\task\hmi.c</FilePath>
+            </File>
+            <File>
+              <FileName>hmi.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\USER\task\hmi.h</FilePath>
+            </File>
+            <File>
+              <FileName>motion_control.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\task\motion_control.c</FilePath>
+            </File>
+            <File>
+              <FileName>motion_control.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\USER\task\motion_control.h</FilePath>
             </File>
           </Files>
         </Group>

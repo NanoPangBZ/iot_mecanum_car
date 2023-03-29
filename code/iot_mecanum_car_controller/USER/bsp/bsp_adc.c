@@ -3,7 +3,6 @@
 
 void bsp_adc_init()
 {
-    HAL_ADC_Start_IT( &hadc2 );
     HAL_ADC_Start_IT( &hadc3 );
 }
 
