@@ -1,17 +1,18 @@
 #ifndef _BSP_H_
 #define _BSP_H_
 
+#include "bsp_wifi.h"
 #include "SysLed.h"
 
-#ifdef _cplusplus
+#ifdef __cplusplus
 extern "C"
 {
-#endif
+#endif  //__cplusplus
 
-void bsp_init();
+void bsp_init(void);
 
-#ifdef _cplusplus
+#ifdef __cplusplus
 }
-#endif
+#endif  //__cplusplus
 
 #endif  //_BSP_H_
