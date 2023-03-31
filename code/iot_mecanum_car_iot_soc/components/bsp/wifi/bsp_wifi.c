@@ -18,6 +18,7 @@ static EventGroupHandle_t s_wifi_event_group = NULL;   //wifi事件 同时用作
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT      BIT1
 
+static esp_netif_t* net_if = NULL;
 static esp_event_handler_instance_t instance_any_id = NULL;
 static esp_event_handler_instance_t instance_got_ip = NULL;
 
@@ -80,7 +81,8 @@ void bsp_wifi_init( void )
     ESP_ERROR_CHECK(esp_netif_init());
 
     ESP_ERROR_CHECK(esp_event_loop_create_default());
-    esp_netif_create_default_wifi_sta();
+    net_if = esp_netif_create_default_wifi_sta();
+    esp_netif_set_hostname( net_if , "iot mecanum car" );
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
                                                         ESP_EVENT_ANY_ID,
@@ -102,9 +104,9 @@ int bsp_wifi_connect( char* wifi_name , char* passwd )
         return -1;
     }
 
-    esp_wifi_disconnect();
+    esp_wifi_stop();
+    xEventGroupClearBits( s_wifi_event_group , WIFI_CONNECTED_BIT | WIFI_FAIL_BIT );
 
-    esp_wifi_deinit();
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 
@@ -127,9 +129,11 @@ int bsp_wifi_connect( char* wifi_name , char* passwd )
 
     if (bits & WIFI_CONNECTED_BIT)
     {
+        xEventGroupClearBits( s_wifi_event_group , WIFI_CONNECTED_BIT );
         return 0;    
     }else if( bits & WIFI_FAIL_BIT )
     {
+        xEventGroupClearBits( s_wifi_event_group , WIFI_FAIL_BIT );
         return -1;
     }
 
