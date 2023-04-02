@@ -49,3 +49,21 @@ int tcp_client_send( uint8_t* data , uint8_t len )
 
     return ret<0? -1 : 0 ;
 }
+
+int tcp_client_recieve( uint8_t* buf , uint8_t buf_len )
+{
+    if( sockfd == -1 )
+    {
+        ESP_LOGW( TAG , "socket is not init!" );
+        return -1;
+    }
+
+    int num = lwip_read( sockfd , buf , buf_len );
+
+    if( num == -1 )
+    {
+        ESP_LOGE( TAG , " recieve error! " );
+    }
+
+    return num;
+}

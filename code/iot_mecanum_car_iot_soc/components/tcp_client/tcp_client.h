@@ -2,7 +2,6 @@
 #define _TCP_CLIENT_H_
 
 #include "esp_netif.h"
-#include "driver/gpio.h"
 
 #include "lwip/err.h"
 #include "lwip/sockets.h"
@@ -16,6 +15,7 @@ extern "C"
 
 int tcp_client_connect( uint32_t ip , uint16_t port );
 int tcp_client_send( uint8_t* data , uint8_t len );
+int tcp_client_recieve( uint8_t* buf , uint8_t buf_len );
 
 #ifdef __cplusplus
 }
