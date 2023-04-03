@@ -8,18 +8,22 @@
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
 
-#ifdef __cplusplus
-extern "C"
+class tcp_client
 {
-#endif  //__cplusplus
+public:
+    tcp_client(  uint32_t ip , uint16_t port  );
+    tcp_client( char* ip , uint16_t port );
+    ~tcp_client();
 
-int tcp_client_connect( uint32_t ip , uint16_t port );
-int tcp_client_send( uint8_t* data , uint8_t len );
-int tcp_client_recieve( uint8_t* buf , uint8_t buf_len );
+    int connect();
 
-#ifdef __cplusplus
-}
-#endif  //__cplusplus
+    int send( uint8_t* data , uint16_t len );
+    int revieve( uint8_t* data_buf , uint16_t buf_len );
+private:
+    int _sockfd;
+    uint32_t _ip;
+    uint16_t _port;
+};
 
 #endif  //_TCP_CLIENT_H_
 

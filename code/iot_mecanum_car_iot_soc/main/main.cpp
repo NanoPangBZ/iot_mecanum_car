@@ -24,16 +24,18 @@ extern "C" void app_main(void)
     uint8_t buf[64];
     int num;
     bsp_init();
-    tcp_client_connect( inet_addr("192.168.1.101") , htons(12341) );
+    tcp_client client( "192.168.1.105" , 12341 );
+    client.connect();
+    client.send( (uint8_t*)"HelloWorld!" , strlen("HelloWorld!") + 1 );
     while(1)
     {
-        tcp_client_send( (uint8_t*)"HelloWorld!" , strlen("HelloWorld!") + 1  );
-        num = tcp_client_recieve( buf , 64 );
+        num = client.revieve( buf , 64 );
         if( num > 0 )
         {
             ESP_LOGI( TAG , "tcp client recieve %d bytes" , num);
-            tcp_client_send( buf , num );
+            client.send( buf , num );
         }
+        ESP_LOGI( TAG , "Tick" );
         vTaskDelay( 1000 / portTICK_PERIOD_MS );
     }
 }
