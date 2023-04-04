@@ -1,23 +1,28 @@
 #ifndef _TCP_SERVER_H_
 #define _TCP_SERVER_H_
 
-#include "esp_netif.h"
-
-#include "lwip/err.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "lwip/sockets.h"
-#include "lwip/sys.h"
-#include <lwip/netdb.h>
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif  //__cplusplus
+class tcp_server{
+public:
+    tcp_server( uint16_t port );
+    ~tcp_server();
 
-int tcp_server_init( void );
+private:
+    TaskHandle_t _taskHandle;
+    static void tcp_server_task( void* param );
 
-#ifdef __cplusplus
-}
-#endif  //__cplusplus
+    char addr_str[128];
+    int ip_protocol = 0;            //tcp协议
+    int keepAlive = 1;              //保活计数
+    int keepIdle;
+    int keepInterval;
+    int keepCount;
+    int listen_sock;
+    struct sockaddr_storage dest_addr;
+};
 
 #endif  //_TCP_SERVER_H_
 
