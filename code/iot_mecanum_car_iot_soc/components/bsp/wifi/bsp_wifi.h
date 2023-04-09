@@ -7,8 +7,12 @@ extern "C"
 #endif  //_cplusplus
 
 void bsp_wifi_init( void );
+
 int bsp_wifi_connect( char* wifi_name , char* passwd );
 void bsp_wifi_disconnect( void );
+
+int bsp_wifi_ap( char* wifi_name , char* passwd );
+
 int bsp_wifi_state( void );
 
 #ifdef __cplusplus

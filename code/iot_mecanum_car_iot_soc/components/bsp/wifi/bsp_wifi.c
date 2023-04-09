@@ -6,56 +6,58 @@
 #include "esp_system.h"
 #include "esp_wifi.h"
 #include "esp_event.h"
+#include "esp_mac.h"
 #include <netdb.h>
 #include "esp_log.h"
 #include "nvs_flash.h"
 
 #define TAG "bsp_wifi"
 
-#define STATIC_IP_ADDR          "192.168.1.202"     //静态IP地址
-#define STATIC_NETMASK_ADDR     "255.255.255.0"     //静态子网掩码
-#define STATIC_GW_ADDR          "192.168.1.1"       //静态网关IP地址
-#define MAIN_DNS_SERVER         STATIC_GW_ADDR      //DNS服务器
-#define BACKUP_DNS_SERVER       "0.0.0.0"           //DNS备份服务器
+// #define STATIC_IP_ADDR          "192.168.1.202"     //静态IP地址
+// #define STATIC_NETMASK_ADDR     "255.255.255.0"     //静态子网掩码
+// #define STATIC_GW_ADDR          "192.168.1.1"       //静态网关IP地址
+// #define MAIN_DNS_SERVER         STATIC_GW_ADDR      //DNS服务器
+// #define BACKUP_DNS_SERVER       "0.0.0.0"           //DNS备份服务器
 
 static EventGroupHandle_t s_wifi_event_group = NULL;   //wifi事件 同时用作bsp_wifi初始化标志
-#define WIFI_CONNECTED_BIT BIT0
-#define WIFI_FAIL_BIT      BIT1
+#define WIFI_CONNECTED_BIT          BIT0
+#define WIFI_DISCONNECTED_BIT       BIT1
+#define WIFI_AP_START_BIT           BIT2
 
 static esp_netif_t* _net_if = NULL;
 static esp_event_handler_instance_t _instance_any_id = NULL;
 static esp_event_handler_instance_t _instance_got_ip = NULL;
 
-static esp_err_t set_dns_server(esp_netif_t *netif, uint32_t addr, esp_netif_dns_type_t type)
-{
-    if (addr && (addr != IPADDR_NONE)) {
-        esp_netif_dns_info_t dns;
-        dns.ip.u_addr.ip4.addr = addr;
-        dns.ip.type = IPADDR_TYPE_V4;
-        ESP_ERROR_CHECK(esp_netif_set_dns_info(netif, type, &dns));
-    }
-    return ESP_OK;
-}
+// static esp_err_t set_dns_server(esp_netif_t *netif, uint32_t addr, esp_netif_dns_type_t type)
+// {
+//     if (addr && (addr != IPADDR_NONE)) {
+//         esp_netif_dns_info_t dns;
+//         dns.ip.u_addr.ip4.addr = addr;
+//         dns.ip.type = IPADDR_TYPE_V4;
+//         ESP_ERROR_CHECK(esp_netif_set_dns_info(netif, type, &dns));
+//     }
+//     return ESP_OK;
+// }
 
-static void set_static_ip(esp_netif_t *netif)
-{
-    if (esp_netif_dhcpc_stop(netif) != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to stop dhcp client");
-        return;
-    }
-    esp_netif_ip_info_t ip;
-    memset(&ip, 0 , sizeof(esp_netif_ip_info_t));
-    ip.ip.addr = ipaddr_addr( STATIC_IP_ADDR );
-    ip.netmask.addr = ipaddr_addr( STATIC_NETMASK_ADDR );
-    ip.gw.addr = ipaddr_addr( STATIC_GW_ADDR );
-    if (esp_netif_set_ip_info(netif, &ip) != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to set ip info");
-        return;
-    }
-    ESP_LOGI(TAG, "Success to set static ip: %s, netmask: %s, gw: %s", STATIC_IP_ADDR, STATIC_NETMASK_ADDR, STATIC_GW_ADDR);
-    ESP_ERROR_CHECK(set_dns_server(netif, ipaddr_addr(MAIN_DNS_SERVER), ESP_NETIF_DNS_MAIN));
-    ESP_ERROR_CHECK(set_dns_server(netif, ipaddr_addr(BACKUP_DNS_SERVER), ESP_NETIF_DNS_BACKUP));
-}
+// static void set_static_ip(esp_netif_t *netif)
+// {
+//     if (esp_netif_dhcpc_stop(netif) != ESP_OK) {
+//         ESP_LOGE(TAG, "Failed to stop dhcp client");
+//         return;
+//     }
+//     esp_netif_ip_info_t ip;
+//     memset(&ip, 0 , sizeof(esp_netif_ip_info_t));
+//     ip.ip.addr = ipaddr_addr( STATIC_IP_ADDR );
+//     ip.netmask.addr = ipaddr_addr( STATIC_NETMASK_ADDR );
+//     ip.gw.addr = ipaddr_addr( STATIC_GW_ADDR );
+//     if (esp_netif_set_ip_info(netif, &ip) != ESP_OK) {
+//         ESP_LOGE(TAG, "Failed to set ip info");
+//         return;
+//     }
+//     ESP_LOGI(TAG, "Success to set static ip: %s, netmask: %s, gw: %s", STATIC_IP_ADDR, STATIC_NETMASK_ADDR, STATIC_GW_ADDR);
+//     ESP_ERROR_CHECK(set_dns_server(netif, ipaddr_addr(MAIN_DNS_SERVER), ESP_NETIF_DNS_MAIN));
+//     ESP_ERROR_CHECK(set_dns_server(netif, ipaddr_addr(BACKUP_DNS_SERVER), ESP_NETIF_DNS_BACKUP));
+// }
 
 static void wifi_event_handler(void* arg, esp_event_base_t event_base,
                                 int32_t event_id, void* event_data)
@@ -69,11 +71,11 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base,
                 esp_wifi_connect();
             break;
             case WIFI_EVENT_STA_CONNECTED:
-                set_static_ip( _net_if );
+                ESP_LOGI( TAG , "wifi connected!" );
             break;
             case WIFI_EVENT_STA_DISCONNECTED:
-                ESP_LOGW( TAG , "wifi disconnected." );
-                xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
+                ESP_LOGW( TAG , "wifi disconnected,connect retry!" );
+                xEventGroupSetBits(s_wifi_event_group, WIFI_DISCONNECTED_BIT);
             break;
         }
     }else if( event_base == IP_EVENT )
@@ -86,6 +88,23 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base,
             case IP_EVENT_STA_GOT_IP:
                 ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
                 xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+            break;
+            default:
+            break;
+        }
+    }else if( event_base == WIFI_EVENT )
+    {
+        ESP_LOGW( TAG , "wifi event" );
+        wifi_event_ap_staconnected_t* event;
+        switch( event_id )
+        {
+            case WIFI_EVENT_AP_STACONNECTED:
+                event = (wifi_event_ap_staconnected_t*) event_data;
+                ESP_LOGI(TAG, "station "MACSTR" join, AID=%d",MAC2STR(event->mac), event->aid);
+            break;
+            case WIFI_EVENT_AP_STADISCONNECTED:
+                event = (wifi_event_ap_stadisconnected_t*) event_data;
+                ESP_LOGI(TAG, "station "MACSTR" leave, AID=%d",MAC2STR(event->mac), event->aid);
             break;
             default:
             break;
@@ -132,6 +151,11 @@ void bsp_wifi_init( void )
                                                         &wifi_event_handler,
                                                         NULL,
                                                         &_instance_got_ip));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
+                                                        ESP_EVENT_ANY_ID,
+                                                        &wifi_event_handler,
+                                                        NULL,
+                                                        NULL));
 }
 
 int bsp_wifi_connect( char* wifi_name , char* passwd )
@@ -145,7 +169,7 @@ int bsp_wifi_connect( char* wifi_name , char* passwd )
     ESP_LOGI( TAG , "ready connect wifi:%s pwd:%s" , wifi_name , passwd );
 
     esp_wifi_stop();
-    xEventGroupClearBits( s_wifi_event_group , WIFI_CONNECTED_BIT | WIFI_FAIL_BIT );
+    xEventGroupClearBits( s_wifi_event_group , WIFI_CONNECTED_BIT | WIFI_DISCONNECTED_BIT );
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
@@ -162,22 +186,26 @@ int bsp_wifi_connect( char* wifi_name , char* passwd )
 
     //等待连接事件
     EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
-            WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
+            WIFI_CONNECTED_BIT | WIFI_DISCONNECTED_BIT,
             pdFALSE,
             pdFALSE,
             portMAX_DELAY);
 
     if (bits & WIFI_CONNECTED_BIT)
     {
-        xEventGroupClearBits( s_wifi_event_group , WIFI_CONNECTED_BIT );
         ESP_LOGI( TAG , "connected wifi:%s" , wifi_name );
         return 0;    
-    }else if( bits & WIFI_FAIL_BIT )
+    }else if( bits & WIFI_DISCONNECTED_BIT )
     {
-        xEventGroupClearBits( s_wifi_event_group , WIFI_FAIL_BIT );
         return -1;
     }
 
+    return -1;
+}
+
+int bsp_wifi_ap( char* wifi_name , char* passwd )
+{
+    
     return -1;
 }
 
