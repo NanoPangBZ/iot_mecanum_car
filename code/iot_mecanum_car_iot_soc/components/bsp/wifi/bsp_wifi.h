@@ -9,11 +9,9 @@ extern "C"
 void bsp_wifi_init( void );
 
 int bsp_wifi_connect( char* wifi_name , char* passwd );
-void bsp_wifi_disconnect( void );
-
 int bsp_wifi_ap( char* wifi_name , char* passwd );
 
-int bsp_wifi_state( void );
+void bsp_wifi_stop( void );
 
 #ifdef __cplusplus
 }

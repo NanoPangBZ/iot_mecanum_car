@@ -24,7 +24,8 @@ static EventGroupHandle_t s_wifi_event_group = NULL;   //wifi事件 同时用作
 #define WIFI_DISCONNECTED_BIT       BIT1
 #define WIFI_AP_START_BIT           BIT2
 
-static esp_netif_t* _net_if = NULL;
+static esp_netif_t* _sta_net_if = NULL;
+static esp_netif_t* _ap_net_if = NULL;
 static esp_event_handler_instance_t _instance_any_id = NULL;
 static esp_event_handler_instance_t _instance_got_ip = NULL;
 
@@ -65,6 +66,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base,
     if (event_base == WIFI_EVENT )
     {
         ESP_LOGW( TAG , "wifi event" );
+        wifi_event_ap_staconnected_t* event;
         switch( event_id )
         {
             case WIFI_EVENT_STA_START:
@@ -76,6 +78,18 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base,
             case WIFI_EVENT_STA_DISCONNECTED:
                 ESP_LOGW( TAG , "wifi disconnected,connect retry!" );
                 xEventGroupSetBits(s_wifi_event_group, WIFI_DISCONNECTED_BIT);
+            break;
+            case WIFI_EVENT_STA_STOP:
+                ESP_LOGW( TAG , "esp wifi stop!" );
+                esp_wifi_disconnect();
+            break;
+            case WIFI_EVENT_AP_STACONNECTED:
+                event = (wifi_event_ap_staconnected_t*) event_data;
+                ESP_LOGI(TAG, "station "MACSTR" join, AID=%d",MAC2STR(event->mac), event->aid);
+            break;
+            case WIFI_EVENT_AP_STADISCONNECTED:
+                event = (wifi_event_ap_stadisconnected_t*) event_data;
+                ESP_LOGI(TAG, "station "MACSTR" leave, AID=%d",MAC2STR(event->mac), event->aid);
             break;
         }
     }else if( event_base == IP_EVENT )
@@ -92,35 +106,18 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base,
             default:
             break;
         }
-    }else if( event_base == WIFI_EVENT )
-    {
-        ESP_LOGW( TAG , "wifi event" );
-        wifi_event_ap_staconnected_t* event;
-        switch( event_id )
-        {
-            case WIFI_EVENT_AP_STACONNECTED:
-                event = (wifi_event_ap_staconnected_t*) event_data;
-                ESP_LOGI(TAG, "station "MACSTR" join, AID=%d",MAC2STR(event->mac), event->aid);
-            break;
-            case WIFI_EVENT_AP_STADISCONNECTED:
-                event = (wifi_event_ap_stadisconnected_t*) event_data;
-                ESP_LOGI(TAG, "station "MACSTR" leave, AID=%d",MAC2STR(event->mac), event->aid);
-            break;
-            default:
-            break;
-        }
     }
 }
 
-void bsp_wifi_disconnect( void )
-{
-    if( !s_wifi_event_group )
-    {
-        ESP_LOGE( TAG , "bsp wifi is not init!" );
-        return;
-    }
-    esp_wifi_disconnect();
-}
+// void bsp_wifi_disconnect( void )
+// {
+//     if( !s_wifi_event_group )
+//     {
+//         ESP_LOGE( TAG , "bsp wifi is not init!" );
+//         return;
+//     }
+//     esp_wifi_disconnect();
+// }
 
 void bsp_wifi_init( void )
 {
@@ -138,8 +135,10 @@ void bsp_wifi_init( void )
     ESP_ERROR_CHECK(esp_netif_init());
 
     ESP_ERROR_CHECK(esp_event_loop_create_default());
-    _net_if = esp_netif_create_default_wifi_sta();
-    esp_netif_set_hostname( _net_if , "iot mecanum car" );
+    _sta_net_if = esp_netif_create_default_wifi_sta();
+    _ap_net_if = esp_netif_create_default_wifi_ap();
+    esp_netif_set_hostname( _sta_net_if , "iot mecanum car" );
+    esp_netif_set_hostname( _ap_net_if , "iot mecanum car" );
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
                                                         ESP_EVENT_ANY_ID,
@@ -151,11 +150,6 @@ void bsp_wifi_init( void )
                                                         &wifi_event_handler,
                                                         NULL,
                                                         &_instance_got_ip));
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
-                                                        ESP_EVENT_ANY_ID,
-                                                        &wifi_event_handler,
-                                                        NULL,
-                                                        NULL));
 }
 
 int bsp_wifi_connect( char* wifi_name , char* passwd )
@@ -205,14 +199,39 @@ int bsp_wifi_connect( char* wifi_name , char* passwd )
 
 int bsp_wifi_ap( char* wifi_name , char* passwd )
 {
-    
-    return -1;
-}
-
-int bsp_wifi_state( void )
-{
-    wifi_ap_record_t record;
-    if( ESP_ERR_WIFI_NOT_CONNECT == esp_wifi_sta_get_ap_info( &record ) )
+    if( !s_wifi_event_group )
+    {
+        ESP_LOGE( TAG , "bsp wifi is not int!" );
         return -1;
+    }
+
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+
+    wifi_config_t wifi_config;
+    memcpy( wifi_config.ap.ssid , wifi_name , strlen( wifi_name ) + 1 );
+    wifi_config.ap.ssid_len = strlen( wifi_name );
+    wifi_config.ap.channel = 1;
+    memcpy( wifi_config.ap.password , passwd , strlen( passwd ) + 1 );
+    wifi_config.ap.max_connection = 1;
+    wifi_config.ap.authmode = WIFI_AUTH_WPA_WPA2_PSK;
+    wifi_config.ap.pmf_cfg.required = false;
+
+    if (strlen(passwd) == 0) {
+        wifi_config.ap.authmode = WIFI_AUTH_OPEN;
+    }
+
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
+    ESP_ERROR_CHECK(esp_wifi_start());
+
+    ESP_LOGI(TAG, "wifi_init_softap finished. SSID:%s password:%s channel:%d",
+             wifi_name, passwd, 1);
     return 0;
 }
+
+void bsp_wifi_stop( void )
+{
+    esp_wifi_stop();
+}
+
