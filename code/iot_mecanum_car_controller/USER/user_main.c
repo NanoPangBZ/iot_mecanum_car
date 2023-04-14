@@ -23,12 +23,20 @@ void sys_led_tick(void* param)
         LED_OFF();
         vTaskDelay( 800 / portTICK_PERIOD_MS );
         LED_ON();
-        vTaskDelay( 60 / portTICK_PERIOD_MS );
+        vTaskDelay( 120 / portTICK_PERIOD_MS );
     }
 }
 
 static void start_task( void* param )
 {
+    for( uint8_t temp = 0 ;temp < 3 ; temp++ )
+    {
+        bsp_beep_on( 200 );
+        vTaskDelay( 120 / portTICK_PERIOD_MS );
+        bsp_beep_off();
+        vTaskDelay( 100 / portTICK_PERIOD_MS );
+    }
+
     xTaskCreate( 
         sys_led_tick ,
         "sys_led",
@@ -37,8 +45,10 @@ static void start_task( void* param )
         1,
         &led_taskHandle
     );
+
     motion_control_start();
     hmi_start();
+
     vTaskDelete( NULL );
 }
 
