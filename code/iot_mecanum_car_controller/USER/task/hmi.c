@@ -1,6 +1,7 @@
 #include "hmi.h"
 
 #include "isr.h"
+#include "bsp.h"
 #include "hardware.h"
 
 #include "motion_control.h"
@@ -49,8 +50,38 @@ static void oled_task( void* param )
     }
 }
 
+static TaskHandle_t _led_taskHandle = NULL;
+void sys_led_tick(void* param)
+{
+    while(1)
+    {
+        LED_OFF();
+        vTaskDelay( 800 / portTICK_PERIOD_MS );
+        LED_ON();
+        vTaskDelay( 120 / portTICK_PERIOD_MS );
+    }
+}
+
+static TaskHandle_t _beep_taskHandle = NULL;
+static void beep_task( void* param )
+{
+    while(1)
+    {
+        
+    }
+}
+
 void hmi_start( void )
 {
+    xTaskCreate( 
+        sys_led_tick ,
+        "sys_led",
+        32,
+        NULL,
+        1,
+        &_led_taskHandle
+    );
+
     xTaskCreate( 
         keyboard_task,
         "key",

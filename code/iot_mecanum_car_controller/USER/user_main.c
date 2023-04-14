@@ -15,18 +15,6 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-static TaskHandle_t led_taskHandle;
-void sys_led_tick(void* param)
-{
-    while(1)
-    {
-        LED_OFF();
-        vTaskDelay( 800 / portTICK_PERIOD_MS );
-        LED_ON();
-        vTaskDelay( 120 / portTICK_PERIOD_MS );
-    }
-}
-
 static void start_task( void* param )
 {
     for( uint8_t temp = 0 ;temp < 3 ; temp++ )
@@ -36,15 +24,6 @@ static void start_task( void* param )
         bsp_beep_off();
         vTaskDelay( 100 / portTICK_PERIOD_MS );
     }
-
-    xTaskCreate( 
-        sys_led_tick ,
-        "sys_led",
-        32,
-        NULL,
-        1,
-        &led_taskHandle
-    );
 
     motion_control_start();
     hmi_start();
@@ -63,7 +42,7 @@ void user_main()
         128,
         NULL,
         15,
-        &led_taskHandle
+        NULL
     );
 
     vTaskStartScheduler();
