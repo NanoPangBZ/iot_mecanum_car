@@ -17,16 +17,10 @@
 
 static void start_task( void* param )
 {
-    for( uint8_t temp = 0 ;temp < 3 ; temp++ )
-    {
-        bsp_beep_on( 200 );
-        vTaskDelay( 120 / portTICK_PERIOD_MS );
-        bsp_beep_off();
-        vTaskDelay( 100 / portTICK_PERIOD_MS );
-    }
-
     motion_control_start();
     hmi_start();
+
+    beep_notice( BEEP_SYS_INIT_FINNISH );
 
     vTaskDelete( NULL );
 }
