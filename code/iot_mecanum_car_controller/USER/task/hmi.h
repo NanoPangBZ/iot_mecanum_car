@@ -1,13 +1,18 @@
 #ifndef _HMI_H_
 #define _HMI_H_
 
-#define KEY_INPUT_BEEP_FRE  1000
-#define KEY_INPUT_BEEP_TIME 200
+#define KEY_SCAN_CYCLE      20
+#define KEY_LONG_THRESHOLD  800     //长按阈值
+
+#define KEY_INPUT_BEEP_FRE  500
+#define KEY_INPUT_BEEP_TIME 160
 
 #define SYS_INIT_BEEP_FRE   500
 #define SYS_INIT_BEEP_COUNT 3
 #define SYS_INIT_BEEP_TIME  120
 #define SYS_INIT_BEEP_OFF_TIME  100
+
+#include <stdint.h>
 
 typedef enum{
     BEEP_NONE,

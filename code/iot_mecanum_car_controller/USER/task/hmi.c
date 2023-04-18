@@ -1,8 +1,11 @@
 #include "hmi.h"
+#include <stdio.h>
+#include <string.h>
 
 #include "isr.h"
 #include "bsp.h"
 #include "hardware.h"
+#include "ui.h"
 
 #include "motion_control.h"
 
@@ -15,41 +18,42 @@ QueueHandle_t beep_queue = NULL;
 static TaskHandle_t _keyboard_taskHandle = NULL;
 static void keyboard_task( void* param )
 {
-    uint8_t last_keycode = 0;
-    uint8_t keycode = 0;
+    uint32_t scan_cycle_tick = KEY_SCAN_CYCLE / portTICK_PERIOD_MS ;
     while(1)
     {
-        keycode = get_keycode();
-        if( keycode != last_keycode )
-        {
-            last_keycode = keycode;
-            switch( keycode )
-            {
-                case 1:
-                    motion_control_suspend();
-                break;
-                case 2: 
-                    motion_control_resume();
-                break;
-                default:
-                break;
-            }
-        }
-        vTaskDelay( 20 / portTICK_PERIOD_MS );
+        vTaskDelay( scan_cycle_tick );
     }
 }
 
 static TaskHandle_t _oled_taskHandle = NULL;
 static void oled_task( void* param )
 {
+    ui_init( &welcome_page );
     while(1)
     {
-        OLED12864_Clear_Page(0);
-        OLED12864_Show_Num( 0 , 0 , motion_get_yaw() , 1 );
-        OLED12864_Clear_Page(1);
-        OLED12864_Show_Num( 1 , 0 , jy901s_yaw , 1 );
-        vTaskDelay( 100 / portTICK_PERIOD_MS );
+        ui_timer_handler( 20 );
+        vTaskDelay( 20 / portTICK_PERIOD_MS );
     }
+
+    // uint8_t buf[16];
+
+    // OLED12864_Show_String( 0 , 0 , "prog yaw:" , 1 );
+    // OLED12864_Show_String( 0 , 9 , "hrd yaw:" , 1 );
+
+    // while(1)
+    // {
+    //     //显示程序坐标系航向角
+    //     OLED12864_Clear_PageBlock( 0 , 64 , 127 - 64 );
+    //     sprintf( (char*)buf , "%.1f" ,  motion_get_yaw() );
+    //     OLED12864_Show_String( 64 , 0 , (char*)buf , 1 );
+
+    //     //显示陀螺仪坐标系航向
+    //     OLED12864_Clear_PageBlock( 1 , 64 , 127 - 64 );
+    //     sprintf( (char*)buf , "%.1f" ,  jy901s_yaw );
+    //     OLED12864_Show_String( 64 , 9 , (char*)buf , 1 );
+
+    //     vTaskDelay( 20 / portTICK_PERIOD_MS );
+    // }
 }
 
 static TaskHandle_t _led_taskHandle = NULL;
