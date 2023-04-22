@@ -1,14 +1,8 @@
 QT += quick
 
 SOURCES += \
-        UiBridge.cpp \
+        BackendThread.cpp \
         main.cpp
-
-resources.files = ui/root.qml
-RESOURCES += resources
-
-CONFIG += lrelease
-CONFIG += embed_translations
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
@@ -22,7 +16,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    UiBridge.h
+    BackendThread.h
 
 DISTFILES += \
-    ui/Motion.qml
+    UI/main.qml
