@@ -63,6 +63,7 @@ Window {
                 anchors.leftMargin: parent.width * 0.02
                 anchors.rightMargin: parent.width * 0.02
                 color:"#9c661f"
+                radius: width * 0.01
                 clip:true
 
                 //wh比
@@ -80,6 +81,8 @@ Window {
 
                     x: parent.width/2 + carPositionX - width/2
                     y: parent.height/2 - carPositionY - height/2
+                    rotation: carPositionYaw
+
                 }
 
                 //实际小车位置视图
@@ -187,12 +190,14 @@ Window {
     Item{
         id:appInfoPanel
         width: parent.width
-        height: parent.height * 0.05
+        height: parent.height * 0.03
         anchors.bottom: parent.bottom
         anchors.right: parent.right
         Text{
+            anchors.right: parent.righ
             text:"版本号:" + appVersion
             font.pixelSize: parent.height * 0.6
+            color: "#ffffff"
         }
     }
 }
