@@ -19,13 +19,13 @@ Window {
     property int connectState: -1 //-1:离线 0:搜索设备中 1:设备1
     property string deviceIVP4Addr: "未知"
     property string appVersion: "demo"
-    property real targetPositionX: 0.0
-    property real targetPositionY: 0.0
-    property real targetPositionYaw: 0.0
-    property real carPositionX: 0.0
-    property real carPositionY: 0.0
-    property real carPositionYaw: 0.0
-    property real gyroscopePosition: 0.0
+    property real targetPositionX: 200
+    property real targetPositionY: 200
+    property real targetPositionYaw: 200
+    property real carPositionX: 200
+    property real carPositionY: 200
+    property real carPositionYaw: 200
+    property real gyroscopePosition: 200
 
     //通知后台构件已经完成构建
     Component.onCompleted:{
@@ -63,7 +63,7 @@ Window {
                 anchors.leftMargin: parent.width * 0.02
                 anchors.rightMargin: parent.width * 0.02
                 color:"#9c661f"
-                clip:ture
+                clip:true
 
                 //wh比
                 //width恒定单位500
@@ -73,21 +73,26 @@ Window {
 
                 //实际小车位置视图
                 Rectangle{
-                    x: carPositionX + 300
                     width: parent.width * 3 / 50
                     height: width * 4 / 3
                     radius: width * 0.2
                     color: Qt.rgba( 1 , 1 , 1 , 0.5 )
+
+                    x: parent.width/2 + carPositionX - width/2
+                    y: parent.height/2 - carPositionY - height/2
                 }
 
                 //实际小车位置视图
                 Rectangle{
                     color: Qt.rgba( 0 , 0 , 0 , 0.0 )
                     width: parent.width * 3 / 50 * 1.2
-                    height: width * 4 / 3 * 1.1
+                    height: width * 4 / 3
                     radius: width * 0.2
-                    border.width: width * 0.1
+                    border.width: width * 0.02
                     border.color: "#802a2a"
+
+                    x: parent.width/2 + carPositionX - width/2
+                    y: parent.height/2 - carPositionY - height/2
                 }
             }
         }
