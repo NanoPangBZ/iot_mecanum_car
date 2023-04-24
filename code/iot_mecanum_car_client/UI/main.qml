@@ -13,6 +13,7 @@ Window {
     minimumHeight: width * 0.6
     visible: true
     title: qsTr("物联网全向移动平台终端")
+    color: "#292421"
 
     //自定义属性
     property int connectState: -1 //-1:离线 0:搜索设备中 1:设备1
@@ -31,20 +32,72 @@ Window {
         backend.qmlCompleted()
     }
 
+    onConnectStateChanged: {
+        if( connectState === -1 )
+        {
+
+        }
+    }
+
     //模型面板
     Item{
         id:modelPanel
         width: parent.width
-        height: parent.height * 0.7
+        height: parent.height * 0.65
         anchors.top: parent.top
         anchors.left: parent.left
+
+        //模型
+        Item{
+            id: modelView
+            width: parent.width * 0.7
+            height: parent.height
+            anchors.top: parent.top
+            anchors.right: parent.right
+
+            //map
+            Rectangle{
+                anchors.fill: parent
+                anchors.topMargin: parent.height * 0.02
+                anchors.bottomMargin: parent.height * 0.02
+                anchors.leftMargin: parent.width * 0.02
+                anchors.rightMargin: parent.width * 0.02
+                color:"#9c661f"
+                clip:ture
+
+                //wh比
+                //width恒定单位500
+                //小车width恒定30
+                //小车height恒定40
+                property real whs: width / height
+
+                //实际小车位置视图
+                Rectangle{
+                    x: carPositionX + 300
+                    width: parent.width * 3 / 50
+                    height: width * 4 / 3
+                    radius: width * 0.2
+                    color: Qt.rgba( 1 , 1 , 1 , 0.5 )
+                }
+
+                //实际小车位置视图
+                Rectangle{
+                    color: Qt.rgba( 0 , 0 , 0 , 0.0 )
+                    width: parent.width * 3 / 50 * 1.2
+                    height: width * 4 / 3 * 1.1
+                    radius: width * 0.2
+                    border.width: width * 0.1
+                    border.color: "#802a2a"
+                }
+            }
+        }
 
         //参数列表
         Item{
             id:paramTabel
             width: parent.width * 0.3
             height: parent.height
-            anchors.top: parent.top7
+            anchors.top: parent.top
             anchors.left: parent.left
             Text{
                 id: connectStateLabel
@@ -52,43 +105,49 @@ Window {
                 anchors.left: parent.left
                 text:"状态:离线"
                 font.pixelSize: parent.height * 0.05
+                color: "#FFFFFF"
             }
             Text{
                 id: targetPosXLeabel
-                anchors.top: parent.top
-                anchors.left: parent.left
-                text:"目标x坐标:" + targetPositionX
+                anchors.top: connectStateLabel.bottom
+                text:"目标x坐标:\t" + targetPositionX
                 font.pixelSize: parent.height * 0.05
+                color: "#FFFFFF"
             }
             Text{
                 id: targetPosYLeabel
                 anchors.top: targetPosXLeabel.bottom
-                text:"目标y坐标:" + targetPositionX
+                text:"目标y坐标:\t" + targetPositionX
                 font.pixelSize: parent.height * 0.05
+                color: "#FFFFFF"
             }
             Text{
                 id: curPosXLeabel
                 anchors.top: targetPosYLeabel.bottom
-                text:"当前x坐标:" + targetPositionX
+                text:"当前x坐标:\t" + targetPositionX
                 font.pixelSize: parent.height * 0.05
+                color: "#FFFFFF"
             }
             Text{
                 id: curPosYLeabel
                 anchors.top: curPosXLeabel.bottom
-                text:"当前y坐标:" + targetPositionX
+                text:"当前y坐标:\t" + targetPositionX
                 font.pixelSize: parent.height * 0.05
+                color: "#FFFFFF"
             }
             Text{
                 id: targetYawLeabel
                 anchors.top: curPosYLeabel.bottom
-                text:"目标航向角:" + targetPositionX
+                text:"目标航向角:\t" + targetPositionX
                 font.pixelSize: parent.height * 0.05
+                color: "#FFFFFF"
             }
             Text{
                 id: curYawLeabel
                 anchors.top: targetYawLeabel.bottom
-                text:"当前航向角:" + targetPositionX
+                text:"当前航向角:\t" + targetPositionX
                 font.pixelSize: parent.height * 0.05
+                color: "#FFFFFF"
             }
         }
     }
@@ -97,7 +156,7 @@ Window {
     Item{
         id:ctrPanel
         width: parent.width * 0.6
-        height: parent.height * 0.25
+        height: parent.height * 0.30
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.bottomMargin: 20
@@ -110,7 +169,7 @@ Window {
     Item{
         id:logPanel
         width: parent.width * 0.4
-        height: parent.height * 0.25
+        height: parent.height * 0.30
         anchors.bottom: parent.bottom
         anchors.right: parent.right
         anchors.bottomMargin: 20
