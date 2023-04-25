@@ -29,6 +29,9 @@ Window {
     property real carWidth: 100
     property real carHeight: 120
 
+    //模型视图横纵缩放比 像素点:车位移单位
+    property real zoom: 1
+
     //通知后台构件已经完成构建
     Component.onCompleted:{
         backend.qmlCompleted()
@@ -57,9 +60,6 @@ Window {
             anchors.top: parent.top
             anchors.right: parent.right
 
-            //横纵缩放比 像素点:车位移单位
-//            property real zoom:
-
             //map
             Rectangle{
                 anchors.fill: parent
@@ -75,7 +75,8 @@ Window {
                     anchors.fill: parent
                     onClicked: {
                         //坐标转换!
-
+                        targetPositionX = mouseX*zoom - parent.width/2
+                        targetPositionY = parent.height/2 - mouseY*zoom
                     }
                 }
 
@@ -86,8 +87,8 @@ Window {
                     radius: width * 0.2
                     color: Qt.rgba( 1 , 1 , 1 , 0.5 )
 
-                    x: parent.width/2 + carPositionX - width/2
-                    y: parent.height/2 - carPositionY - height/2
+                    x: parent.width/2 + carPositionX*zoom - width/2
+                    y: parent.height/2 - carPositionY*zoom - height/2
                     rotation: carPositionYaw
 
                 }
@@ -101,8 +102,8 @@ Window {
                     border.width: width * 0.02
                     border.color: "#802a2a"
 
-                    x: parent.width/2 + targetPositionX - width/2
-                    y: parent.height/2 - targetPositionY - height/2
+                    x: parent.width/2 + targetPositionX*zoom - width/2
+                    y: parent.height/2 - targetPositionY*zoom - height/2
                     rotation: targetPositionYaw
                 }
             }
@@ -126,14 +127,14 @@ Window {
             Text{
                 id: targetPosXLeabel
                 anchors.top: connectStateLabel.bottom
-                text:"目标x坐标:\t" + targetPositionX
+                text:"目标x坐标:\t" + targetPositionX.toFixed(2)
                 font.pixelSize: parent.height * 0.05
                 color: "#FFFFFF"
             }
             Text{
                 id: targetPosYLeabel
                 anchors.top: targetPosXLeabel.bottom
-                text:"目标y坐标:\t" + targetPositionX
+                text:"目标y坐标:\t" + targetPositionY.toFixed(2)
                 font.pixelSize: parent.height * 0.05
                 color: "#FFFFFF"
             }
