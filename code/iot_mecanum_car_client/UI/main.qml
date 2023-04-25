@@ -85,7 +85,7 @@ Window {
 
                 }
 
-                //实际小车位置视图
+                //目标小车位置视图
                 Rectangle{
                     color: Qt.rgba( 0 , 0 , 0 , 0.0 )
                     width: parent.width * 3 / 50 * 1.2
@@ -94,8 +94,9 @@ Window {
                     border.width: width * 0.02
                     border.color: "#802a2a"
 
-                    x: parent.width/2 + carPositionX - width/2
-                    y: parent.height/2 - carPositionY - height/2
+                    x: parent.width/2 + targetPositionX - width/2
+                    y: parent.height/2 - targetPositionY - height/2
+                    rotation: targetPositionYaw
                 }
             }
         }
@@ -132,21 +133,21 @@ Window {
             Text{
                 id: curPosXLeabel
                 anchors.top: targetPosYLeabel.bottom
-                text:"当前x坐标:\t" + targetPositionX
+                text:"当前x坐标:\t" + carPositionX.toFixed(2)
                 font.pixelSize: parent.height * 0.05
                 color: "#FFFFFF"
             }
             Text{
                 id: curPosYLeabel
                 anchors.top: curPosXLeabel.bottom
-                text:"当前y坐标:\t" + targetPositionX
+                text:"当前y坐标:\t" + carPositionY.toFixed(2)
                 font.pixelSize: parent.height * 0.05
                 color: "#FFFFFF"
             }
             Text{
                 id: targetYawLeabel
                 anchors.top: curPosYLeabel.bottom
-                text:"目标航向角:\t" + targetPositionX
+                text:"目标航向角:\t" + carPositionYaw.toFixed(2)
                 font.pixelSize: parent.height * 0.05
                 color: "#FFFFFF"
             }

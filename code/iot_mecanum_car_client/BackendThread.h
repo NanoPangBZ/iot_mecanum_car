@@ -25,6 +25,8 @@ private:
 private:
     BackendThread();
     ~BackendThread();
+
+    void updataCarPosition( float x , float y , float yaw );
 };
 
 #endif // BACKENDTHREAD_H

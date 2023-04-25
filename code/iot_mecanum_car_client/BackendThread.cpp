@@ -1,6 +1,7 @@
 #include "BackendThread.h"
 #include <windows.h>
 #include <QVariant>
+#include <math.h>
 
 //唯一实例
 BackendThread BackendThread::backendThread;
@@ -14,9 +15,12 @@ void* BackendThread::_main(void*param)
     sem_wait( &backendThread._rootUiCompleted );
     Sleep(100);
 
+    float t = 0;
     while(1)
     {
-
+        backendThread.updataCarPosition( sin( t ) * 300 , cos( t ) * 300 , sin(t*2) * 180 );
+        t += 0.01;
+        Sleep(10);
     }
     return param;
 }
@@ -34,4 +38,11 @@ BackendThread::~BackendThread()
 void BackendThread::qmlCompleted()
 {
     sem_post( &_rootUiCompleted );
+}
+
+void BackendThread::updataCarPosition( float x , float y , float yaw )
+{
+    qmlObj->setProperty( "carPositionX" , QVariant(x) );
+    qmlObj->setProperty( "carPositionY" , QVariant(y) );
+    qmlObj->setProperty( "carPositionYaw" , QVariant(yaw) );
 }
