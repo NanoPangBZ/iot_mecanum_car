@@ -21,13 +21,22 @@ Window {
     property string appVersion: "demo"
     property real targetPositionX: 200
     property real targetPositionY: 200
-    property real targetPositionYaw: 200
+    property real targetPositionYaw: 0
     property real carPositionX: 200
     property real carPositionY: 200
     property real carPositionYaw: 200
     property real gyroscopePosition: 200
     property real carWidth: 100
     property real carHeight: 120
+    property real carSpeedX: 0
+    property real carSpeedY: 0
+    property real carSpeedYaw: 0
+    property real carWheel1Speed: 0
+    property real carWheel2Speed: 0
+    property real carWheel3Speed: 0
+    property real carWheel4Speed: 0
+    property int carYawMode: 0  //0:锁定 1:不锁定
+
 
     //模型视图横纵缩放比 像素点:车位移单位
     property real zoom: 1
@@ -35,6 +44,24 @@ Window {
     //通知后台构件已经完成构建
     Component.onCompleted:{
         backend.qmlCompleted()
+    }
+
+    onTargetPositionXChanged: {
+        backend.targetPositionRefresh( targetPositionX , targetPositionY )
+    }
+
+    onTargetPositionYChanged: {
+        backend.targetPositionRefresh( targetPositionX , targetPositionY )
+    }
+
+    onCarYawModeChanged: {
+        if( carYawMode === 0 )
+        {
+            yawSwitch.text = "航向角解锁"
+        }else{
+            yawSwitch.text = "航向角锁定"
+        }
+        backend.carYawModeRefresh( carYawMode );
     }
 
     onConnectStateChanged: {
@@ -82,6 +109,7 @@ Window {
 
                 //实际小车位置视图
                 Rectangle{
+                    id: curCarModel
                     width: parent.width * 0.06
                     height: width / carWidth * carHeight
                     radius: width * 0.2
@@ -95,11 +123,12 @@ Window {
 
                 //目标小车位置视图
                 Rectangle{
+                    id: targetCarModel
                     color: Qt.rgba( 0 , 0 , 0 , 0.0 )
                     width: parent.width * 0.06 * 1.2
                     height: width / carWidth * carHeight
                     radius: width * 0.2
-                    border.width: width * 0.02
+                    border.width: width * 0.04
                     border.color: "#802a2a"
 
                     x: parent.width/2 + targetPositionX*zoom - width/2
@@ -125,44 +154,86 @@ Window {
                 color: "#FFFFFF"
             }
             Text{
-                id: targetPosXLeabel
+                id: targetPosXLabel
                 anchors.top: connectStateLabel.bottom
                 text:"目标x坐标:\t" + targetPositionX.toFixed(2)
                 font.pixelSize: parent.height * 0.05
                 color: "#FFFFFF"
             }
             Text{
-                id: targetPosYLeabel
-                anchors.top: targetPosXLeabel.bottom
+                id: targetPosYLabel
+                anchors.top: targetPosXLabel.bottom
                 text:"目标y坐标:\t" + targetPositionY.toFixed(2)
                 font.pixelSize: parent.height * 0.05
                 color: "#FFFFFF"
             }
             Text{
-                id: curPosXLeabel
-                anchors.top: targetPosYLeabel.bottom
+                id: curPosXLabel
+                anchors.top: targetPosYLabel.bottom
                 text:"当前x坐标:\t" + carPositionX.toFixed(2)
                 font.pixelSize: parent.height * 0.05
                 color: "#FFFFFF"
             }
             Text{
-                id: curPosYLeabel
-                anchors.top: curPosXLeabel.bottom
+                id: curPosYLabel
+                anchors.top: curPosXLabel.bottom
                 text:"当前y坐标:\t" + carPositionY.toFixed(2)
                 font.pixelSize: parent.height * 0.05
                 color: "#FFFFFF"
             }
             Text{
-                id: targetYawLeabel
-                anchors.top: curPosYLeabel.bottom
-                text:"目标航向角:\t" + targetPositionYaw
+                id: targetYawLabel
+                anchors.top: curPosYLabel.bottom
+                text:"目标航向角:\t" + targetPositionYaw.toFixed(2)
                 font.pixelSize: parent.height * 0.05
                 color: "#FFFFFF"
             }
             Text{
-                id: curYawLeabel
-                anchors.top: targetYawLeabel.bottom
+                id: curYawLabel
+                anchors.top: targetYawLabel.bottom
                 text:"当前航向角:\t" + carPositionYaw.toFixed(2)
+                font.pixelSize: parent.height * 0.05
+                color: "#FFFFFF"
+            }
+            Text{
+                id: carSpeedXLabel
+                anchors.top: curYawLabel.bottom
+                text:"小车X速度:\t" + carSpeedX.toFixed(2)
+                font.pixelSize: parent.height * 0.05
+                color: "#FFFFFF"
+            }
+            Text{
+                id: carSpeedYLabel
+                anchors.top: carSpeedXLabel.bottom
+                text:"小车Y速度:\t" + carSpeedY.toFixed(2)
+                font.pixelSize: parent.height * 0.05
+                color: "#FFFFFF"
+            }
+            Text{
+                id: carSpeedYawLabel
+                anchors.top: carSpeedYLabel.bottom
+                text:"小车Yaw速度:" + carSpeedYaw.toFixed(2)
+                font.pixelSize: parent.height * 0.05
+                color: "#FFFFFF"
+            }
+            Text{
+                id: carWheel1SpeedLabel
+                anchors.top: carSpeedYawLabel.bottom
+                text:"电机1速度:\t" + carWheel1Speed.toFixed(2)
+                font.pixelSize: parent.height * 0.05
+                color: "#FFFFFF"
+            }
+            Text{
+                id: carWheel2SpeedLabel
+                anchors.top: carWheel1SpeedLabel.bottom
+                text:"电机2速度:\t" + carWheel2Speed.toFixed(2)
+                font.pixelSize: parent.height * 0.05
+                color: "#FFFFFF"
+            }
+            Text{
+                id: carWheel3SpeedLabel
+                anchors.top: carWheel2SpeedLabel.bottom
+                text:"电机3速度:\t" + carWheel3Speed.toFixed(2)
                 font.pixelSize: parent.height * 0.05
                 color: "#FFFFFF"
             }
@@ -177,11 +248,62 @@ Window {
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.bottomMargin: 20
-        Text{
-            text:"控制面板"
-            color: "#FFFFFF"
-            font.pixelSize: parent.height * 0.06
+
+        Button{
+            id: connectBtn
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.leftMargin: parent.width * 0.03
+            anchors.rightMargin: parent.height * 0.02
+
+            width: parent.width * 0.2
+            height: parent.height * 0.2
+            text: "连接小车"
+            font.pixelSize: parent.width * 0.03
+
+            onClicked: {
+                backend.autoConnectCar()
+            }
         }
+
+        Button{
+            id: posZeroBtn
+            anchors.left: parent.left
+            anchors.top: connectBtn.bottom
+            anchors.leftMargin: parent.width * 0.03
+            anchors.rightMargin: parent.height * 0.02
+
+            width: parent.width * 0.2
+            height: parent.height * 0.2
+            text: "目标归零"
+            font.pixelSize: parent.width * 0.03
+
+            onClicked: {
+                targetPositionX = 0
+                targetPositionY = 0
+            }
+        }
+
+        Button{
+            id: yawSwitch
+            anchors.left: parent.left
+            anchors.top: posZeroBtn.bottom
+            anchors.leftMargin: parent.width * 0.03
+            anchors.rightMargin: parent.height * 0.02
+
+            width: parent.width * 0.2
+            height: parent.height * 0.2
+            text: "航向角解锁"
+            font.pixelSize: parent.width * 0.03
+
+            onClicked: {
+                if( carYawMode )
+                    carYawMode = 0
+                else
+                    carYawMode = 1
+            }
+        }
+
     }
 
     //日志面板

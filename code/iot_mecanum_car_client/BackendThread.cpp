@@ -42,6 +42,19 @@ void BackendThread::qmlCompleted()
     sem_post( &_rootUiCompleted );
 }
 
+void BackendThread::targetPositionRefresh( float x , float y )
+{
+}
+
+void BackendThread::autoConnectCar()
+{
+}
+
+void BackendThread::carYawModeRefresh( int mode )
+{
+
+}
+
 void BackendThread::updataCarPosition( float x , float y , float yaw )
 {
     qmlObj->setProperty( "carPositionX" , QVariant(x) );

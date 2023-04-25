@@ -14,6 +14,9 @@ public:
 //对qml开放的接口
 public:
     Q_INVOKABLE void qmlCompleted();
+    Q_INVOKABLE void targetPositionRefresh( float x , float y );
+    Q_INVOKABLE void autoConnectCar();
+    Q_INVOKABLE void carYawModeRefresh( int mode );
 
 //线程
 private:
