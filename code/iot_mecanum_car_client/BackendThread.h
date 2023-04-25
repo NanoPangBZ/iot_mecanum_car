@@ -27,6 +27,7 @@ private:
     ~BackendThread();
 
     void updataCarPosition( float x , float y , float yaw );
+    void setCarRectangle( float width , float height );
 };
 
 #endif // BACKENDTHREAD_H

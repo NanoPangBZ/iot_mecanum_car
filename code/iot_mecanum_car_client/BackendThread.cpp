@@ -15,6 +15,8 @@ void* BackendThread::_main(void*param)
     sem_wait( &backendThread._rootUiCompleted );
     Sleep(100);
 
+    backendThread.setCarRectangle( 100 , 140 );
+
     float t = 0;
     while(1)
     {
@@ -46,3 +48,10 @@ void BackendThread::updataCarPosition( float x , float y , float yaw )
     qmlObj->setProperty( "carPositionY" , QVariant(y) );
     qmlObj->setProperty( "carPositionYaw" , QVariant(yaw) );
 }
+
+void BackendThread::setCarRectangle( float width , float height )
+{
+    qmlObj->setProperty( "carWidth" , QVariant(width) );
+    qmlObj->setProperty( "carHeight" , QVariant(height) );
+}
+

@@ -26,6 +26,8 @@ Window {
     property real carPositionY: 200
     property real carPositionYaw: 200
     property real gyroscopePosition: 200
+    property real carWidth: 100
+    property real carHeight: 120
 
     //通知后台构件已经完成构建
     Component.onCompleted:{
@@ -55,6 +57,9 @@ Window {
             anchors.top: parent.top
             anchors.right: parent.right
 
+            //横纵缩放比 像素点:车位移单位
+//            property real zoom:
+
             //map
             Rectangle{
                 anchors.fill: parent
@@ -66,16 +71,18 @@ Window {
                 radius: width * 0.01
                 clip:true
 
-                //wh比
-                //width恒定单位500
-                //小车width恒定30
-                //小车height恒定40
-                property real whs: width / height
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: {
+                        //坐标转换!
+
+                    }
+                }
 
                 //实际小车位置视图
                 Rectangle{
-                    width: parent.width * 3 / 50
-                    height: width * 4 / 3
+                    width: parent.width * 0.06
+                    height: width / carWidth * carHeight
                     radius: width * 0.2
                     color: Qt.rgba( 1 , 1 , 1 , 0.5 )
 
@@ -88,8 +95,8 @@ Window {
                 //目标小车位置视图
                 Rectangle{
                     color: Qt.rgba( 0 , 0 , 0 , 0.0 )
-                    width: parent.width * 3 / 50 * 1.2
-                    height: width * 4 / 3
+                    width: parent.width * 0.06 * 1.2
+                    height: width / carWidth * carHeight
                     radius: width * 0.2
                     border.width: width * 0.02
                     border.color: "#802a2a"
@@ -147,14 +154,14 @@ Window {
             Text{
                 id: targetYawLeabel
                 anchors.top: curPosYLeabel.bottom
-                text:"目标航向角:\t" + carPositionYaw.toFixed(2)
+                text:"目标航向角:\t" + targetPositionYaw
                 font.pixelSize: parent.height * 0.05
                 color: "#FFFFFF"
             }
             Text{
                 id: curYawLeabel
                 anchors.top: targetYawLeabel.bottom
-                text:"当前航向角:\t" + targetPositionX
+                text:"当前航向角:\t" + carPositionYaw.toFixed(2)
                 font.pixelSize: parent.height * 0.05
                 color: "#FFFFFF"
             }
@@ -171,6 +178,8 @@ Window {
         anchors.bottomMargin: 20
         Text{
             text:"控制面板"
+            color: "#FFFFFF"
+            font.pixelSize: parent.height * 0.06
         }
     }
 
@@ -184,6 +193,8 @@ Window {
         anchors.bottomMargin: 20
         Text{
             text:"日志面板"
+            color: "#FFFFFF"
+            font.pixelSize: parent.height * 0.06
         }
     }
 
