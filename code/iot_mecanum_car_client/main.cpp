@@ -3,6 +3,7 @@
 #include <QQmlContext>
 
 #include "BackendThread.h"
+#include "NetIpHelper.h"
 
 QObject* qmlObj = 0;
 

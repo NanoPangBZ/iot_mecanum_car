@@ -1,7 +1,10 @@
-QT += quick
+QT += quick network
 
 SOURCES += \
         BackendThread.cpp \
+        CustomProtocol/iot_mecanum_car_protocol.c \
+        NetIpHelper.cpp \
+        TcpClient/TcpClient.cpp \
         main.cpp
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
@@ -16,7 +19,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    BackendThread.h
+    BackendThread.h \
+    CustomProtocol/iot_mecanum_car_protocol.h \
+    NetIpHelper.h \
+    TcpClient/TcpClient.h
 
 DISTFILES += \
     UI/main.qml
