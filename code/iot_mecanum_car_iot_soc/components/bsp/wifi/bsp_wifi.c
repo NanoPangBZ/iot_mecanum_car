@@ -109,16 +109,6 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base,
     }
 }
 
-// void bsp_wifi_disconnect( void )
-// {
-//     if( !s_wifi_event_group )
-//     {
-//         ESP_LOGE( TAG , "bsp wifi is not init!" );
-//         return;
-//     }
-//     esp_wifi_disconnect();
-// }
-
 void bsp_wifi_init( void )
 {
     if( s_wifi_event_group )
@@ -137,8 +127,8 @@ void bsp_wifi_init( void )
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     _sta_net_if = esp_netif_create_default_wifi_sta();
     _ap_net_if = esp_netif_create_default_wifi_ap();
-    esp_netif_set_hostname( _sta_net_if , "iot mecanum car" );
-    esp_netif_set_hostname( _ap_net_if , "iot mecanum car" );
+    esp_netif_set_hostname( _sta_net_if , "iot_mecanum_car" );
+    esp_netif_set_hostname( _ap_net_if , "iot_mecanum_car" );
 
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
                                                         ESP_EVENT_ANY_ID,

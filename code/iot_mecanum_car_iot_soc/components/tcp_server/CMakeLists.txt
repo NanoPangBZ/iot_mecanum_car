@@ -1,4 +1,4 @@
-set( SRCS  tcp_server.cpp)
+set( SRCS  TcpServer.cpp)
 
 set( DIRS       ".")
 
