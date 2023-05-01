@@ -3,9 +3,17 @@
 
 #define TAG "TcpServer"
 
+#define KEEPALIVE_IDLE              1
+#define KEEPALIVE_INTERVAL          1
+#define KEEPALIVE_COUNT             10
+
 typedef struct{
     TcpApp _app;
     int sock;
+    int keepAlive;
+    int keepIdle;
+    int keepInterval;
+    int keepCount;
 }TcpServerAppCtx;
 
 //tcp服务器的监听任务
@@ -65,9 +73,15 @@ void TcpServer::_serverListen( void* param )
             ESP_LOGE(TAG, "Unable to accept connection: errno %d", errno);
             break;
         }else{
+            //增加处理函数
             TcpServerAppCtx* ctx = new TcpServerAppCtx;
             ctx->_app = tcpServer->_app;
             ctx->sock = sock;
+            ctx->keepAlive = 1;
+            ctx->keepIdle = KEEPALIVE_IDLE;
+            ctx->keepInterval = KEEPALIVE_INTERVAL;
+            ctx->keepCount = KEEPALIVE_COUNT;
+
             //创建处理这个客户端的请求的任务
             xTaskCreatePinnedToCore( 
                 _serverAppBridge ,
@@ -90,6 +104,12 @@ void TcpServer::_serverListen( void* param )
 void TcpServer::_serverAppBridge(void* param)
 {
     TcpServerAppCtx* ctx = (TcpServerAppCtx*)param;
+    int sock = ctx->sock;
+
+    setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &ctx->keepAlive, sizeof(int));
+    setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, &ctx->keepIdle, sizeof(int));
+    setsockopt(sock, IPPROTO_TCP, TCP_KEEPINTVL, &ctx->keepInterval, sizeof(int));
+    setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT, &ctx->keepCount, sizeof(int));
 
     ESP_LOGI( TAG , "tcp server bridge created!" );
     ESP_LOGI( TAG , "tcp server app running!" );
