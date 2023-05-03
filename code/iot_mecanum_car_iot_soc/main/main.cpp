@@ -16,7 +16,7 @@ void tcpApp( int sock )
     {
         //等待客户端数据和检查是否在线
         len = recv( sock , buf , 512 , 0 );
-        if( !len )
+        if( len < 1 )
         {
             ESP_LOGI( TAG , "client logoff");
             return;
@@ -36,7 +36,7 @@ extern "C" void app_main(void)
 
     bsp_wifi_init();
 
-    if( !bsp_wifi_connect( "Redmi Note 11T Pro" , "09296666" ) )
+    if( !bsp_wifi_connect( "MOSS(4316)" , "4316yyds" ) )
     {
         tcpServer.start( 144 , tcpApp , 4096 );
     }
