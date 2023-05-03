@@ -25,6 +25,9 @@ typedef struct{
     int keepCount;
     TaskHandle_t taskHandle;
     TcpServer*  server;
+    struct sockaddr_in peerAddr;
+    int peer_len;
+    char ipAddrStr[INET_ADDRSTRLEN];
 }TcpServerAppCtx;
 
 class TcpServer{

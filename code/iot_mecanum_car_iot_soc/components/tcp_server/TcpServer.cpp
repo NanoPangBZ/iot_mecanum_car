@@ -73,6 +73,8 @@ void TcpServer::_serverListen( void* param )
             ctx->keepInterval = KEEPALIVE_INTERVAL;
             ctx->keepCount = KEEPALIVE_COUNT;
             ctx->server = tcpServer;
+            ctx->peer_len = sizeof( ctx->peerAddr );
+            getpeername( sock , (struct sockaddr*)&ctx->peerAddr , (socklen_t*)&ctx->peer_len );
 
             xSemaphoreTake( tcpServer->appLock , -1 );
 
@@ -87,6 +89,7 @@ void TcpServer::_serverListen( void* param )
                 &ctx->taskHandle,
                 tskNO_AFFINITY
             );
+            ESP_LOGI( TAG , "tcp client (%s:%d) is connected!" , inet_ntop(AF_INET, &ctx->peerAddr.sin_addr, ctx->ipAddrStr, sizeof(ctx->ipAddrStr)), ntohs(ctx->peerAddr.sin_port) );
 
             xSemaphoreGive( tcpServer->appLock );
         }
