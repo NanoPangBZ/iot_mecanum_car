@@ -27,6 +27,10 @@
  */
  
 #include <elog.h>
+#include <string.h>
+#include "FreeRTOS.h"
+#include "task.h"
+#include "usbd_cdc_if.h"
 
 /**
  * EasyLogger port initialize
@@ -37,7 +41,6 @@ ElogErrCode elog_port_init(void) {
     ElogErrCode result = ELOG_NO_ERR;
 
     /* add your code here */
-    
     return result;
 }
 
@@ -60,7 +63,7 @@ void elog_port_deinit(void) {
 void elog_port_output(const char *log, size_t size) {
     
     /* add your code here */
-    
+    CDC_Transmit_FS( (uint8_t*)log , (uint16_t)size );
 }
 
 /**
@@ -86,10 +89,25 @@ void elog_port_output_unlock(void) {
  *
  * @return current time
  */
+char time_stamp_string[13];
 const char *elog_port_get_time(void) {
     
     /* add your code here */
-    
+    if( taskSCHEDULER_RUNNING == xTaskGetSchedulerState() )
+    {
+        TickType_t ms = xTaskGetTickCount() / portTICK_PERIOD_MS ;
+        int hous = ms / 3600000;
+        ms -= hous*3600000;
+        int min = ms / 60000;
+        ms -= min * 60000;
+        int sec = ms / 1000;
+        ms -= sec*1000;
+        sprintf( time_stamp_string , "%02d:%02d:%02d:%03d" , hous , min , sec , ms );
+        return time_stamp_string;
+    }else
+    {
+        return "--:--:--:---";    
+    }
 }
 
 /**
@@ -100,7 +118,7 @@ const char *elog_port_get_time(void) {
 const char *elog_port_get_p_info(void) {
     
     /* add your code here */
-    
+    return " ";
 }
 
 /**
@@ -111,5 +129,8 @@ const char *elog_port_get_p_info(void) {
 const char *elog_port_get_t_info(void) {
     
     /* add your code here */
-    
+    if( taskSCHEDULER_RUNNING == xTaskGetSchedulerState() )
+        return pcTaskGetName( NULL );
+    else
+        return "bare";
 }
