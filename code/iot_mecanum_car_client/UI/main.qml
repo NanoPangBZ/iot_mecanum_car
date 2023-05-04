@@ -253,8 +253,7 @@ Window {
             id: connectBtn
             anchors.left: parent.left
             anchors.top: parent.top
-            anchors.leftMargin: parent.width * 0.03
-            anchors.rightMargin: parent.height * 0.02
+            anchors.margins: parent.width * 0.008
 
             width: parent.width * 0.2
             height: parent.height * 0.2
@@ -270,8 +269,7 @@ Window {
             id: posZeroBtn
             anchors.left: parent.left
             anchors.top: connectBtn.bottom
-            anchors.leftMargin: parent.width * 0.03
-            anchors.rightMargin: parent.height * 0.02
+            anchors.margins: parent.width * 0.008
 
             width: parent.width * 0.2
             height: parent.height * 0.2
@@ -288,8 +286,7 @@ Window {
             id: yawSwitch
             anchors.left: parent.left
             anchors.top: posZeroBtn.bottom
-            anchors.leftMargin: parent.width * 0.03
-            anchors.rightMargin: parent.height * 0.02
+            anchors.margins: parent.width * 0.008
 
             width: parent.width * 0.2
             height: parent.height * 0.2
@@ -301,6 +298,40 @@ Window {
                     carYawMode = 0
                 else
                     carYawMode = 1
+            }
+        }
+
+        Item{
+            id: ipv4_addr
+            anchors.left: parent.left
+            anchors.top: yawSwitch.bottom
+            anchors.margins: parent.width * 0.008
+
+            width: parent.width * 0.2
+            height: parent.height * 0.2
+
+            Text{
+                id: ipv4_addr_lable
+                text:"ipv4地址:"
+                font.pixelSize: parent.height * 0.5
+                color: "#FFFFFF"
+            }
+
+            Rectangle{
+                anchors.top: ipv4_addr_lable.bottom
+                color: Qt.rgba( 1 , 1 , 1 , 1)
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: parent.height * 0.5
+                TextInput{
+                    id:input
+                    width: parent.width
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.horizontalCenter : parent.horizontalCenter
+                    font.pixelSize: parent.height * 0.6
+                    focus:true
+                    validator: RegularExpressionValidator { regularExpression: /[0-9A-Fa-f.]+/ }
+                }
             }
         }
 

@@ -24,3 +24,15 @@ bool TcpClient::connect( char* ipv4_addr_str , uint16_t port )
     sock->connectToHost( hostAddr , port );
     return true;
 }
+
+bool TcpClient::send( uint8_t* data , uint16_t len )
+{
+    if( sock == nullptr )
+    {
+        return false;
+    }
+
+    sock->write( (char*)data , len );
+
+    return true;
+}
