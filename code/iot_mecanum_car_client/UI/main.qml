@@ -24,7 +24,7 @@ Window {
     property real targetPositionYaw: 0
     property real carPositionX: 200
     property real carPositionY: 200
-    property real carPositionYaw: 200
+    property real carPositionYaw: 0
     property real gyroscopePosition: 200
     property real carWidth: 100
     property real carHeight: 120
@@ -37,9 +37,10 @@ Window {
     property real carWheel4Speed: 0
     property int carYawMode: 0  //0:锁定 1:不锁定
 
-
-    //模型视图横纵缩放比 像素点:车位移单位
-    property real zoom: 1
+    //模型地图竖向固定3000单位长度
+    //模型地图横向固定5400单位长度
+    property real mapHeight: 800
+    property real mapWidth: mapHeight * 1.8
 
     //通知后台构件已经完成构建
     Component.onCompleted:{
@@ -82,8 +83,8 @@ Window {
         //模型
         Item{
             id: modelView
-            width: parent.width * 0.7
             height: parent.height
+            width: height * 1.8
             anchors.top: parent.top
             anchors.right: parent.right
 
@@ -102,21 +103,21 @@ Window {
                     anchors.fill: parent
                     onClicked: {
                         //坐标转换!
-                        targetPositionX = mouseX*zoom - parent.width/2
-                        targetPositionY = parent.height/2 - mouseY*zoom
+                        targetPositionX = ( mouseX - parent.width/2 ) / ( parent.width / mapWidth )
+                        targetPositionY = ( parent.height/2 - mouseY ) / ( parent.height / mapHeight )
                     }
                 }
 
                 //实际小车位置视图
                 Rectangle{
                     id: curCarModel
-                    width: parent.width * 0.06
-                    height: width / carWidth * carHeight
+                    width: carWidth * ( parent.width / mapWidth )
+                    height: carHeight * ( parent.height / mapHeight )
                     radius: width * 0.2
                     color: Qt.rgba( 1 , 1 , 1 , 0.5 )
 
-                    x: parent.width/2 + carPositionX*zoom - width/2
-                    y: parent.height/2 - carPositionY*zoom - height/2
+                    x: parent.width/2 + carPositionX*( parent.width / mapWidth ) - width/2
+                    y: parent.height/2 - carPositionY*( parent.height / mapHeight ) - height/2
                     rotation: carPositionYaw
 
                 }
@@ -125,14 +126,14 @@ Window {
                 Rectangle{
                     id: targetCarModel
                     color: Qt.rgba( 0 , 0 , 0 , 0.0 )
-                    width: parent.width * 0.06 * 1.2
-                    height: width / carWidth * carHeight
+                    width: carWidth * ( parent.width / mapWidth ) * 1.3
+                    height: carHeight * ( parent.height / mapHeight ) * 1.2
                     radius: width * 0.2
                     border.width: width * 0.04
                     border.color: "#802a2a"
 
-                    x: parent.width/2 + targetPositionX*zoom - width/2
-                    y: parent.height/2 - targetPositionY*zoom - height/2
+                    x: parent.width/2 + targetPositionX*( parent.width / mapWidth ) - width/2
+                    y: parent.height/2 - targetPositionY*( parent.height / mapHeight ) - height/2
                     rotation: targetPositionYaw
                 }
             }
