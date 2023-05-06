@@ -10,19 +10,31 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include <math.h>
+
 #define WHELL_SPEED_MIN 100
 #define WHELL_SPEED_MAX 3000
+#define PI  3.1415926
 
 static float programe_yaw_ofs;      //程序参考坐标系相对陀螺仪的偏移
 static float target_yaw = 0;        //目标航向角 -> 程序参考坐标系
 static float target_position[2];    //目标位置 -> 程序参考坐标系
+static float car_position[2];       //当前位置 -> 程序参考坐标系
 static uint8_t              motion_state = 0;   //0:待机 1:机动中
 static mecanum_constant_t   model = { 1 , 1 , 1 };      //脉轮运动学模型常数
-static mecanum_output_t     car_target_speed = { 0 , 0 , 0 };  //小车目标运动矢量
-static mecanum_output_t     car_posi_speed = { 0 , 0 , 0 };     //运动学正解实际轮子速度获得的当前小车运动矢量
+static mecanum_center_speed_t     car_target_speed = { 0 , 0 , 0 };  //小车目标运动矢量
+static mecanum_center_speed_t     car_posi_speed = { 0 , 0 , 0 };     //运动学正解实际轮子速度获得的当前小车运动矢量
+static motion_control_function_t  motion_control_function = 0;
 
-static TaskHandle_t _car_speed_taskHandle = NULL;
-static void car_speed_control_task( void* param )
+//小车速度控制线程 -> 最终实现控制的线程
+static TaskHandle_t _car_speed_control_taskHandle = NULL;
+static void car_speed_control_task( void* param );
+
+//小车航目标速度设置线程
+static TaskHandle_t _target_speed_set_taskHanle = NULL;
+static void _target_speed_set_task( void* param );
+
+void car_speed_control_task( void* param )
 {
     mecanum_input_t wheel_speed;
     PID_Handle pid[4];
@@ -73,8 +85,7 @@ static void car_speed_control_task( void* param )
     }
 }
 
-static TaskHandle_t _yaw_control_taskHanle = NULL;
-static void yaw_control_task( void* param )
+void _target_speed_set_task( void* param )
 {
     TickType_t time = xTaskGetTickCount();
     PID_Handle yaw_pid = { 7.2 , 0.01 , 0.02 , 1.0 , 0 , 0 , { 0 , 0 , 0  } , 1000 , -1000 };
@@ -97,9 +108,10 @@ static void yaw_control_task( void* param )
 
 void motion_control_start()
 {
-    if( _car_speed_taskHandle || _yaw_control_taskHanle ) return;
+    if( _car_speed_control_taskHandle ) return;
 
     motion_reset_yaw();
+    motion_control_function_enable( ENABLE_ALL );
 
     xTaskCreate(
         car_speed_control_task,
@@ -107,16 +119,16 @@ void motion_control_start()
         128,
         NULL,
         14,
-        &_car_speed_taskHandle
+        &_car_speed_control_taskHandle
     );
 
     xTaskCreate(
-        yaw_control_task,
+        _target_speed_set_task,
         "yaw control",
         72,
         NULL,
         13,
-        &_yaw_control_taskHanle
+        &_target_speed_set_taskHanle
     );
 }
 
@@ -137,19 +149,73 @@ void motion_reset_yaw()
 
 void motion_control_suspend( void )
 {
-    if( _car_speed_taskHandle ) vTaskSuspend( _car_speed_taskHandle );
-    if( _yaw_control_taskHanle ) vTaskSuspend( _yaw_control_taskHanle );
+    if( _car_speed_control_taskHandle ) vTaskSuspend( _car_speed_control_taskHandle );
+    if( _target_speed_set_taskHanle ) vTaskSuspend( _target_speed_set_taskHanle );
 }
 
 void motion_control_resume( void )
 {
-    if( _car_speed_taskHandle )
+    if( _car_speed_control_taskHandle )
     {
-        vTaskResume( _car_speed_taskHandle );
+        vTaskResume( _car_speed_control_taskHandle );
     }
+}
 
-    if( _yaw_control_taskHanle )
+void motion_set_target_position( float x , float y , position_reference_t ref )
+{
+    if( ref == SOFT_REF)
     {
-        vTaskResume( _yaw_control_taskHanle );
+        target_position[0] = x;
+        target_position[1] = y;
+    }else if( ref == CAR_REF )
+    {
+        target_position[0] = ( x - car_position[0] ) * cos( motion_get_yaw() * ( PI / 180 ) ) ;
+        target_position[1] = ( x - car_position[1] ) * sin( motion_get_yaw() * ( PI / 180 ) ) ;
     }
+}
+
+void motion_reset_position( void )
+{
+    target_position[0] += car_position[0];
+    target_position[1] += car_position[1];
+    car_position[0] = car_position[1] = 0;
+}
+
+void motion_get_target_position( float* x , float*y , position_reference_t ref )
+{
+    if( ref == SOFT_REF )
+    {
+        *x = target_position[0];
+        *y = target_position[1];
+    }else if( ref == CAR_REF )
+    {
+        *x = ( target_position[0] - car_position[0] ) * cos( motion_get_yaw() * ( PI / 180 ) );
+        *y = ( target_position[1] - car_position[1] ) * sin( motion_get_yaw() * ( PI / 180 ) );
+    }
+}
+
+void motion_set_target_yaw( float yaw )
+{
+    target_yaw = yaw;
+}
+
+void motion_control_function_enable( motion_control_function_t function )
+{
+    motion_control_function |= function;
+}
+
+void motion_control_function_disable( motion_control_function_t function )
+{
+    motion_control_function &= ~function;
+}
+
+motion_control_function_t motion_get_control_function( void )
+{
+    return motion_control_function;
+}
+
+void motion_get_position( float* x , float* y , position_reference_t ref)
+{
+    *x = target_position[0];
+    *y = target_position[1];
 }
