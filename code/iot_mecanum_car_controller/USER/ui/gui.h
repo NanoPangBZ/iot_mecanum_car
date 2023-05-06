@@ -2,19 +2,13 @@
 #define _GUI_H_
 
 #include <stdint.h>
+#include "page_def.h"
 
-typedef struct{
-    void (*init)(void);
-    void (*deinit)(void);
-    void (*timer_handler)( uint16_t ms );
-}page_t;
-
-extern const page_t welcome_page;
-
-void ui_init( const page_t* first_page );
-void ui_deinit( void );
-void ui_timer_handler( uint16_t ms );
-void ui_set_page( const page_t *opt );
+void gui_init( const page_t* first_page );
+void gui_deinit( void );
+void gui_timer_handler( uint16_t ms );
+void gui_set_page( const page_t *opt );
+void gui_evt_input( gui_evt_t evt );
 
 #endif  //_UI_H_
 

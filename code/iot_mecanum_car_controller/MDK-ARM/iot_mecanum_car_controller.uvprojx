@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xE,STM32_THREAD_SAFE_STRATEGY=2</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../USB_DEVICE/App;../USB_DEVICE/Target;../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;../OS;../OS/include;../OS/portable;../USER;../USER/bsp;../USER/hardware;../USER/alg;../USER/protocol;../USER/task;..\USER\ui</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../USB_DEVICE/App;../USB_DEVICE/Target;../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;../OS;../OS/include;../OS/portable;../USER;../USER/bsp;../USER/hardware;../USER/alg;../USER/protocol;../USER/task;..\USER\ui;..\USER\easylogger\inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -530,14 +530,19 @@
           <GroupName>UI</GroupName>
           <Files>
             <File>
-              <FileName>ui.c</FileName>
+              <FileName>gui.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\USER\ui\ui.c</FilePath>
+              <FilePath>..\USER\ui\gui.c</FilePath>
             </File>
             <File>
-              <FileName>ui.h</FileName>
+              <FileName>gui.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\USER\ui\ui.h</FilePath>
+              <FilePath>..\USER\ui\gui.h</FilePath>
+            </File>
+            <File>
+              <FileName>page_def.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\USER\ui\page_def.h</FilePath>
             </File>
             <File>
               <FileName>page_home.c</FileName>
@@ -545,19 +550,9 @@
               <FilePath>..\USER\ui\page_home.c</FilePath>
             </File>
             <File>
-              <FileName>page_home.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\USER\ui\page_home.h</FilePath>
-            </File>
-            <File>
               <FileName>page_welcome.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\USER\ui\page_welcome.c</FilePath>
-            </File>
-            <File>
-              <FileName>page_welcome.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\USER\ui\page_welcome.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -678,6 +673,36 @@
               <FileName>wit_protocol.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\USER\protocol\wit_protocol\wit_protocol.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>EASYLOGGER</GroupName>
+          <Files>
+            <File>
+              <FileName>elog.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\easylogger\src\elog.c</FilePath>
+            </File>
+            <File>
+              <FileName>elog_async.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\easylogger\src\elog_async.c</FilePath>
+            </File>
+            <File>
+              <FileName>elog_buf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\easylogger\src\elog_buf.c</FilePath>
+            </File>
+            <File>
+              <FileName>elog_utils.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\easylogger\src\elog_utils.c</FilePath>
+            </File>
+            <File>
+              <FileName>elog_port.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\easylogger\port\elog_port.c</FilePath>
             </File>
           </Files>
         </Group>

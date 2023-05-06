@@ -20,19 +20,6 @@ typedef enum{
     BEEP_SYS_INIT_FINNISH,
 }beep_notice_t;
 
-typedef enum{
-    KEY_PRESS,
-    KEY_RELEASE,
-    KEY_SHORT,
-    KEY_TIMEOUT,
-    KEY_DOUBLE
-}keyboard_event_t;
-
-typedef struct{
-    keyboard_event_t evt;
-    uint8_t keycode;
-}keyboard_hmi_input_t;
-
 void hmi_start( void );
 void beep_notice( beep_notice_t notice );
 
