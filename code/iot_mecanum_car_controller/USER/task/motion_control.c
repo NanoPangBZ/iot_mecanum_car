@@ -18,12 +18,12 @@
 
 static float programe_yaw_ofs;      //程序参考坐标系相对陀螺仪的偏移
 static float target_yaw = 0;        //目标航向角 -> 程序参考坐标系
-static float target_position[2];    //目标位置 -> 程序参考坐标系
+static float target_position[2];    //目标位置(位置控制模式下有效) -> 程序参考坐标系
 static float car_position[2];       //当前位置 -> 程序参考坐标系
 static uint8_t              motion_state = 0;   //0:待机 1:机动中
 static mecanum_constant_t   model = { 1 , 1 , 1 };      //脉轮运动学模型常数
-static mecanum_center_speed_t     car_target_speed = { 0 , 0 , 0 };  //小车目标运动矢量
-static mecanum_center_speed_t     car_posi_speed = { 0 , 0 , 0 };     //运动学正解实际轮子速度获得的当前小车运动矢量
+static mecanum_center_speed_t     car_target_speed = { 0 , 0 , 0 };  //小车最终合成的速度矢量 -> 小车坐标系
+static mecanum_center_speed_t     car_real_speed = { 0 , 0 , 0 };     //运动学正解实际轮子速度获得的当前小车运动矢量 -> 小车坐标系
 static motion_control_function_t  motion_control_function = 0;
 
 //小车速度控制线程 -> 最终实现控制的线程
@@ -77,7 +77,7 @@ void car_speed_control_task( void* param )
         }
 
         //通过实际轮子速度计算小车速度 对其积分 计算位移
-        // mecanum_positive_calculate( &model , &wheel_speed , &car_posi_speed );
+        // mecanum_positive_calculate( &model , &wheel_speed , &car_real_speed );
         //将小车的速度矢量转化到程序参考坐标系
         //todo
 
@@ -94,14 +94,28 @@ void _target_speed_set_task( void* param )
     yaw_pid.Target = 0; //目标值始终为0
     while(1)
     {
-        err_yaw = target_yaw - motion_get_yaw();
-        //机动过程中偏差大于0.5°时才开始修正航向角
-        //待机状态下偏差大于2°时才开始修正航向角
-        threshold = motion_state ? 2 : 0.5;
-        if( err_yaw < motion_state && err_yaw > -motion_state ) err_yaw = 0;
-        else    PID_IncOperation( &yaw_pid , err_yaw );
+        if( motion_control_function & YAW_LOCK_ENABLE )
+        {
+            err_yaw = target_yaw - motion_get_yaw();
+            //机动过程中偏差大于0.5°时才开始修正航向角
+            //待机状态下偏差大于2°时才开始修正航向角
+            threshold = motion_state ? 2 : 0.5;
+            if( err_yaw < motion_state && err_yaw > -motion_state ) err_yaw = 0;
+            else    PID_IncOperation( &yaw_pid , err_yaw );
+            car_target_speed.cr_speed = yaw_pid.Output;
+        }
 
-        car_target_speed.cr_speed = yaw_pid.Output;
+        if( motion_control_function & TARGET_POSITION_ENABLE )
+        {
+            if( motion_control_function & POSITION_PID_ENABLE )
+            {
+
+            }else
+            {
+                
+            }
+        }
+
         vTaskDelayUntil( &time , 50 / portTICK_PERIOD_MS );
     }
 }
@@ -171,6 +185,14 @@ void motion_set_target_position( float x , float y , position_reference_t ref )
     {
         target_position[0] = ( x - car_position[0] ) * cos( motion_get_yaw() * ( PI / 180 ) ) ;
         target_position[1] = ( x - car_position[1] ) * sin( motion_get_yaw() * ( PI / 180 ) ) ;
+    }
+}
+
+void motion_set_target_speed( float x , float y , float yaw_speed , position_reference_t ref )
+{
+    if( ref == SOFT_REF )
+    {
+        
     }
 }
 

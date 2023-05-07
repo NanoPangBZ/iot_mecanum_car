@@ -27,6 +27,7 @@ motion_control_function_t motion_get_control_function( void );
 void motion_reset_yaw( void );
 void motion_reset_position( void );
 void motion_set_target_position( float x , float y , position_reference_t ref );
+void motion_set_target_speed( float x , float y , float yaw_speed , position_reference_t ref );
 void motion_set_target_yaw( float yaw );
 
 //运动控制模块信息输出
