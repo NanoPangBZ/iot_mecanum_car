@@ -47,9 +47,10 @@ void OLED12864_Test( void );
 void OLED12864_Flush( void );
 void OLED12864_Draw_Point( uint8_t x, uint8_t y , uint8_t bit );
 void OLED12864_Draw_Map( uint8_t sx , uint8_t sy , uint8_t ex , uint8_t ey , uint8_t* map );
-void OLED12864_Fill_Bolck( uint8_t sx , uint8_t sy , uint8_t ex , uint8_t ey , uint8_t bit );
+void OLED12864_Fill_Block( uint8_t sx , uint8_t sy , uint8_t width , uint8_t height , uint8_t bit );
+void OLED12864_Draw_Line(uint8_t x1,uint8_t y1,uint8_t x2,uint8_t y2);
 void OLED12864_Clear( void );
-void OLED12864_Clear_Block( uint8_t sx , uint8_t sy , uint8_t ex , uint8_t ey );
+void OLED12864_Clear_Block( uint8_t sx , uint8_t sy , uint8_t width , uint8_t height );
 
 void OLED12864_Show_Char( char chr , uint8_t x , uint8_t y , font_t font );
 void OLED12864_Show_String( char* str , uint8_t x , uint8_t y , font_t font );

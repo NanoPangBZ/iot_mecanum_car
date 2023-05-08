@@ -126,14 +126,50 @@ void OLED12864_DMA_Sync_Start(void)
 
 void OLED12864_Flush( void )
 {
-    //..
+    OLED12864_Set_Position( 0 , 0 );
+    OLED12864_Send_NumByte( OLED12864_Sbuffer[0] , 1024 , OLED_DATA );
 }
 
+#include "stm32f1xx_hal.h" 
 void OLED12864_Test( void )
 {
-    uint8_t temp[8];
-    memset( temp , 0xff , 8 );
-    OLED12864_Draw_Map( 0 , 0 , 8 , 0 , temp );
+    uint8_t test[2][16];
+    memset( test[0] , 0x00 , 32 );
+    uint8_t x = 72;
+    uint8_t y = 0;
+    OLED12864_Show_String( "HelloWorld!" , x , y , ASSIC_8x6 );
+}
+
+void OLED12864_Draw_Line(uint8_t x1,uint8_t y1,uint8_t x2,uint8_t y2)
+{
+    float k = (float)(y1 - y2) / (float)(x1 -x2);   //斜率
+    float k_1 = 1 / k;
+
+    float sx = x1;
+    float sy = y1;
+    while( sx != x2){
+        OLED12864_Draw_Point((int)sx,(int)sy,1);
+        if( sx < x2 ){
+            sx ++;
+            sy += k;
+        }else{
+            sx --;
+            sy -= k;
+        }
+    }
+
+    sx = x1;
+    sy = y1;
+    while( sy != y2 ){
+        OLED12864_Draw_Point((int)sx,(int)sy,1);
+        if( sy < y2 ){
+            sy ++;
+            sx += k_1;
+        }else{
+            sy --;
+            sx -= k_1;
+        }
+    }
 }
 
 void OLED12864_Clear_Sbuffer(void)
@@ -154,6 +190,8 @@ void OLED12864_Clear(void)
 
 void OLED12864_Draw_Point( uint8_t x, uint8_t y , uint8_t bit )
 {
+    if( x > x_MAX - 1 || y > y_MAX - 1 )
+        return;
     uint8_t page = y / 8;
     uint8_t bit_mask = (0x01)<<( y % 8 );
     if( bit )
@@ -162,22 +200,94 @@ void OLED12864_Draw_Point( uint8_t x, uint8_t y , uint8_t bit )
         OLED12864_Sbuffer[ page ][ x ] &= ~bit_mask;
 }
 
-void OLED12864_Draw_Map( uint8_t sx , uint8_t sy , uint8_t ex , uint8_t ey , uint8_t* map )
+void OLED12864_Fill_Block( uint8_t sx , uint8_t sy , uint8_t width , uint8_t height , uint8_t bit )
 {
-    uint8_t s_page = sy / 8 , e_page = ey / 8;
-    uint8_t ofs = sy % 8;
-    uint8_t ofs_s = 8 - ofs;
-    for( uint8_t c_page = s_page ; c_page <= e_page ;  c_page ++ )
+    uint8_t data = bit ? 0xff : 0x00;
+    uint8_t ofs = sy % 8 ;
+    uint8_t ofs_2 = 8 - ofs;
+    uint8_t seg_u_mask = 0xff << ofs_2;
+    uint8_t seg_d_mask = ~seg_u_mask;
+
+    for( uint8_t cy = 0 ; cy < height ; cy += 8 )
     {
-        uint8_t* buf_addr = OLED12864_Sbuffer[ c_page ];
-        for( uint8_t cx = sx ; cx <= ex ; sx ++ )
+        uint8_t* seg_addr = &OLED12864_Sbuffer[ ( sy + cy ) / 8 ][sx];
+        for( uint8_t cx = 0 ; cx < width ; cx++ )
         {
-            buf_addr[ cx ] |= ~( 0xff << ofs );
-            *buf_addr |= ( (*map) << ofs);
-            buf_addr += 128;
-            *buf_addr &= ~( 0xff >> ofs );
-            *buf_addr |= ( (*map) >> ofs );
-            map ++;
+            *(seg_addr) &=  ~(0xff << ofs);
+            *(seg_addr) |=  data << ofs;
+            seg_addr += 128;
+            *(seg_addr) &=  ~(0xff >> ofs_2);
+            *(seg_addr) |=  data >> ofs_2;
+            seg_addr -= 127;
+        }
+    }
+}
+
+void OLED12864_Clear_Block( uint8_t sx , uint8_t sy , uint8_t width , uint8_t height )
+{
+    OLED12864_Fill_Block( sx , sy , width , height , 0 );
+}
+
+void OLED12864_Show_Char( char chr , uint8_t x , uint8_t y , font_t font )
+{
+    switch( font )
+    {
+        case ASSIC_8x6:
+            OLED12864_Draw_Map( x , y , 6 , 8 , (uint8_t*)assic_0806[chr-0x20] );
+        break;
+        case ASSIC_16X8:
+            OLED12864_Draw_Map( x , y , 8 , 16 , (uint8_t*)assic_1608[chr-0x20] );
+        break;
+        default:
+            OLED12864_Draw_Map( x , y , 6 , 8 , (uint8_t*)assic_0806[chr-0x20] );
+        break;
+    }
+}
+
+void OLED12864_Show_String( char* str , uint8_t x , uint8_t y , font_t font )
+{
+    uint8_t x_inc;
+    switch ( font )
+    {
+    case ASSIC_8x6:
+        x_inc = 6;
+        break;
+    case ASSIC_16X8:
+        x_inc = 8;
+        break;
+    default:
+        x_inc = 6;
+        break;
+    }
+
+    while( *str != '\0' )
+    {
+        OLED12864_Show_Char( *str , x , y , font );
+        x += x_inc;
+        str++;
+    }
+}
+
+void OLED12864_Draw_Map( uint8_t sx , uint8_t sy , uint8_t width , uint8_t height , uint8_t* map )
+{
+    uint8_t ofs = sy % 8 ;
+    uint8_t ofs_2 = 8 - ofs;
+    uint8_t seg_u_mask = 0xff << ofs_2;
+    uint8_t seg_d_mask = ~seg_u_mask;
+
+    for( uint8_t cy = 0 ; cy < height && sy + cy < 64 ; cy += 8 )
+    {
+        uint8_t* seg_addr = &OLED12864_Sbuffer[ ( sy + cy ) / 8 ][sx];
+        //边界 seg_addr <= &OLED12864_Sbuffer[7][127]
+        for( uint8_t cx = 0 ; cx < width && sx + cx < 128 ; cx++ )
+        {
+            *(seg_addr) &=  ~(0xff << ofs);
+            *(seg_addr) |=  (*map) << ofs;
+            seg_addr += 128;
+            *(seg_addr) &=  ~(0xff >> ofs_2);
+            *(seg_addr) |=  (*map) >> ofs_2;
+            seg_addr -= 127;
+            map++;
         }
     }
 }
