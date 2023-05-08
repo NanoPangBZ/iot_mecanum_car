@@ -228,6 +228,16 @@ void OLED12864_Clear_Block( uint8_t sx , uint8_t sy , uint8_t width , uint8_t he
     OLED12864_Fill_Block( sx , sy , width , height , 0 );
 }
 
+void OLED12864_Fast_Clear_Block( uint8_t page , uint8_t x , uint8_t len )
+{
+    // memset( &OLED12864_Sbuffer[page][x] , 0 , len );
+    uint8_t* seg_addr = &OLED12864_Sbuffer[page][x];
+    for( uint8_t temp = 0 ; temp < len ; temp++ )
+    {
+        seg_addr[temp] = 0;
+    }
+}
+
 void OLED12864_Show_Char( char chr , uint8_t x , uint8_t y , font_t font )
 {
     switch( font )

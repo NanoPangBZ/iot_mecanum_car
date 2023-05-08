@@ -51,9 +51,9 @@ void OLED12864_Fill_Block( uint8_t sx , uint8_t sy , uint8_t width , uint8_t hei
 void OLED12864_Draw_Line(uint8_t x1,uint8_t y1,uint8_t x2,uint8_t y2);
 void OLED12864_Clear( void );
 void OLED12864_Clear_Block( uint8_t sx , uint8_t sy , uint8_t width , uint8_t height );
+void OLED12864_Fast_Clear_Block( uint8_t page , uint8_t x , uint8_t len );
 
 void OLED12864_Show_Char( char chr , uint8_t x , uint8_t y , font_t font );
 void OLED12864_Show_String( char* str , uint8_t x , uint8_t y , font_t font );
-
 
 #endif  //_OLED12864_H_

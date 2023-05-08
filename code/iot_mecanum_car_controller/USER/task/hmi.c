@@ -31,8 +31,8 @@ static void oled_task( void* param )
     gui_init( &welcome_page );
     while(1)
     {
-        gui_timer_handler( 20 );
-        vTaskDelay( 20 / portTICK_PERIOD_MS );
+        gui_timer_handler( 50 );
+        vTaskDelay( 50 / portTICK_PERIOD_MS );
     }
 }
 
