@@ -1,11 +1,17 @@
 #include "oled12864.h"
 #include "font_lib.h"
 #include <stdio.h>
+#include <string.h>
 
 //引脚编号
 #define OLED_RES    0
 #define OLED_DC     1
 #define OLED_CS     2
+
+static void OLED12864_Send_Byte(uint8_t dat,uint8_t cmd);
+static void OLED12864_Send_NumByte(const uint8_t*dat,uint16_t len,uint8_t cmd);
+static void OLED12864_Set_Position(uint8_t page,uint8_t x);
+static void OLED12864_Draw_SegOfs( uint8_t x , uint8_t y , uint8_t data );
 
 /************************************************
  * OLED12864缓存
@@ -24,8 +30,7 @@ static unsigned char OLED12864_InitCmd[28] = {
     0x14,0xa4,0xa6,0xaf
 };
 
-/*************************************************************************************************/
-
+/*********************************port macro*******************************************************/
 //移植对接宏
 #include "stm32f1xx_hal.h"
 #define OLED12864_delay_ms(ms)              HAL_Delay(ms)
@@ -34,24 +39,33 @@ static unsigned char OLED12864_InitCmd[28] = {
 #define OLED12864_Reset_Bit(pin_Num)        gpio_write( pin_Num , 0)
 #define OLED12864_SPI_Init()                spi_init()
 #define OLED12864_GPIO_Init()               gpio_init()
-#define OLED12864_Auto_refresh()            auto_refresh()
+#if OLED12864_DMA_ENABLE
+#define OLED12864_DMA_Init()                dma_init()
+#define OLED12864_DMA_Buf_Sync_Start( buf , len )   dma_start( buf , len )
+#endif  //OLED12864_DMA_ENABLE
+
+/*********************************port realize************************************************/
+#include "gpio.h"
+#include "main.h"
+#include "spi.h"
+#include "dma.h"
 
 //对接实现
 static void spi_init(void);
 static void spi_send_byte(uint8_t data);
 static void gpio_write(uint8_t pin_num , uint8_t bit);
 static void gpio_init(void);
-static void auto_refresh(void);
+static void dma_init(void);
+static void dma_start( uint8_t* buf , uint16_t len );
 
-#include "gpio.h"
-#include "main.h"
-#include "spi.h"
-#include "dma.h"
-
-static void auto_refresh()
+static void dma_start( uint8_t* buf , uint16_t len )
 {
-    //dma初始化移交hal库
-    HAL_SPI_Transmit_DMA( &OLED_SPI , OLED12864_Sbuffer[0] , 1024 );
+    HAL_SPI_Transmit_DMA( &OLED_SPI , buf , len );
+}
+
+static void dma_init(void)
+{
+    //DMA初始化交给Hal初始化
 }
 
 static void spi_send_byte(uint8_t data)
@@ -86,7 +100,9 @@ void OLED12864_Init(void)
     OLED12864_Set_Position(0,0);
     OLED12864_Set_Bit(OLED_DC);
     OLED12864_delay_ms(100);
-    OLED12864_Auto_refresh();
+#if OLED12864_DMA_ENABLE
+    OLED12864_DMA_Init();
+#endif
 }
 
 void OLED12864_Hard_Reset(void)
@@ -99,6 +115,25 @@ void OLED12864_Hard_Reset(void)
 
     OLED12864_Send_NumByte(OLED12864_InitCmd,28,OLED_CMD);
     OLED12864_Clear();
+}
+
+#if OLED12864_DMA_ENABLE
+void OLED12864_DMA_Sync_Start(void)
+{
+    OLED12864_DMA_Buf_Sync_Start( OLED12864_Sbuffer[0] , x_MAX * y_MAX / 8 );
+}
+#endif  //OLED12864_DMA_ENABLE
+
+void OLED12864_Flush( void )
+{
+    //..
+}
+
+void OLED12864_Test( void )
+{
+    uint8_t temp[8];
+    memset( temp , 0xff , 8 );
+    OLED12864_Draw_Map( 0 , 0 , 8 , 0 , temp );
 }
 
 void OLED12864_Clear_Sbuffer(void)
@@ -114,18 +149,42 @@ void OLED12864_Clear_Sbuffer(void)
 void OLED12864_Clear(void)
 {
     OLED12864_Clear_Sbuffer();
-    OLED12864_Refresh();
+    OLED12864_Flush();
 }
 
-void OLED12864_Refresh(void)
+void OLED12864_Draw_Point( uint8_t x, uint8_t y , uint8_t bit )
 {
-    #if 0
-    OLED12864_Set_Position(0,0);
-    OLED12864_Send_NumByte(OLED12864_Sbuffer[0],1024,OLED_DATA);
-    #endif
+    uint8_t page = y / 8;
+    uint8_t bit_mask = (0x01)<<( y % 8 );
+    if( bit )
+        OLED12864_Sbuffer[ page ][ x ] |= bit_mask;
+    else
+        OLED12864_Sbuffer[ page ][ x ] &= ~bit_mask;
 }
 
-void OLED12864_Set_Position(uint8_t page,uint8_t x)
+void OLED12864_Draw_Map( uint8_t sx , uint8_t sy , uint8_t ex , uint8_t ey , uint8_t* map )
+{
+    uint8_t s_page = sy / 8 , e_page = ey / 8;
+    uint8_t ofs = sy % 8;
+    uint8_t ofs_s = 8 - ofs;
+    for( uint8_t c_page = s_page ; c_page <= e_page ;  c_page ++ )
+    {
+        uint8_t* buf_addr = OLED12864_Sbuffer[ c_page ];
+        for( uint8_t cx = sx ; cx <= ex ; sx ++ )
+        {
+            buf_addr[ cx ] |= ~( 0xff << ofs );
+            *buf_addr |= ( (*map) << ofs);
+            buf_addr += 128;
+            *buf_addr &= ~( 0xff >> ofs );
+            *buf_addr |= ( (*map) >> ofs );
+            map ++;
+        }
+    }
+}
+
+/**********************************内部函数************************************************/
+
+static void OLED12864_Set_Position(uint8_t page,uint8_t x)
 {
     uint8_t dat[3];
     dat[0] = 0xb0 + page;           //页地址
@@ -134,7 +193,7 @@ void OLED12864_Set_Position(uint8_t page,uint8_t x)
     OLED12864_Send_NumByte(dat,3,OLED_CMD);
 }
 
-void OLED12864_Send_NumByte(const uint8_t*dat,uint16_t len,uint8_t cmd)
+static void OLED12864_Send_NumByte(const uint8_t*dat,uint16_t len,uint8_t cmd)
 {
     if(cmd)
         OLED12864_Set_Bit(OLED_DC);
@@ -148,7 +207,7 @@ void OLED12864_Send_NumByte(const uint8_t*dat,uint16_t len,uint8_t cmd)
     }
 }
 
-void OLED12864_Send_Byte(uint8_t dat,uint8_t cmd)
+static void OLED12864_Send_Byte(uint8_t dat,uint8_t cmd)
 {
     if(cmd)
         OLED12864_Set_Bit(OLED_DC);
@@ -158,212 +217,22 @@ void OLED12864_Send_Byte(uint8_t dat,uint8_t cmd)
     OLED12864_SPI_Send_Byte(dat);
 }
 
-void OLED12864_Clear_PageBlock(uint8_t page,uint8_t x,uint8_t len)
+static void OLED12864_Draw_SegOfs( uint8_t x , uint8_t y , uint8_t data )
 {
-    uint8_t sx = x+len;
-    if(sx > x_MAX-1 || page > page_MAX-1)
-        return;
-    for(uint8_t temp=0;temp<len;temp++)
-        OLED12864_Sbuffer[page][temp+x] = 0x00;
-}
+    uint8_t page = y / 8;
+    uint8_t ofs = y % 8;
+    uint8_t* buf_addr = &OLED12864_Sbuffer[ page ][ x ];
 
-void OLED12864_Clear_Page(uint8_t page)
-{
-    OLED12864_Clear_PageBlock(page,0,127);
-}
-
-void OLED12864_Show_Char(uint8_t x,uint8_t y,uint8_t chr,uint8_t size)
-{
-    uint8_t* offsetAddr = OLED12864_Sbuffer[0] + ( (y/8) * 128 ) + x;
-    uint8_t pageOffset = y%8;
-    uint8_t pageUpOffset = 8 - pageOffset;
-    switch (size)
+    if( ofs )
     {
-    case 1:
-        for(uint8_t sx = 0; sx<6 ;sx++){
-            *(offsetAddr) &=  ~(0xff << pageOffset);
-            *(offsetAddr) |=  assic_0806[chr-0x20][sx] << pageOffset;
-            offsetAddr += 128;
-            *(offsetAddr) &=  ~(0xff >> pageUpOffset);
-            *(offsetAddr) |=  assic_0806[chr-0x20][sx] >> pageUpOffset;
-            offsetAddr -= 127;
-        }
-        break;
-    case 2:
-        for(uint8_t sx = 0; sx<8 ;sx++){
-            *(offsetAddr) &=  ~(0xff << pageOffset);
-            *(offsetAddr) |=  (assic_1608[chr-0x20][sx] << pageOffset);
-            offsetAddr += 128;
-            *(offsetAddr) &=  ~0xff ;
-            *(offsetAddr) |=  assic_1608[chr-0x20][sx] >> pageUpOffset;
-            *(offsetAddr) |=  assic_1608[chr-0x20][sx+8] << pageOffset;
-            offsetAddr += 128;
-            *(offsetAddr) &=  ~(0xff >> pageUpOffset);
-            *(offsetAddr) |=  (assic_1608[chr-0x20][sx+8] >> pageUpOffset);
-            offsetAddr -= 255;
-        }
-        break;
-    default:
-        break;
-    }
-}
-
-uint8_t  OLED12864_Show_Num(uint8_t page,uint8_t x,int num,uint8_t size)
-{
-    char sbuf[8];
-    sprintf((char*)sbuf,"%d",num);
-    OLED12864_Show_String( x , page*8 , sbuf , 1 );
-    return 0;
-}
-
-uint8_t OLED12864_Show_fNum(uint8_t page,uint8_t x,double num,uint8_t size,uint8_t d_len)
-{
-    int L_Num;              //整数部分
-    double R_Num;           //小数部分
-    int R_Num2;             //根据小数部分化整
-    uint8_t L_len = 0;      //整数部分长度
-    if(d_len==0)
-        d_len = 1;
-    L_Num = (int)num;
-    R_Num = num - L_Num;
-    if(R_Num<0)
-        R_Num = -R_Num;
-    L_len = OLED12864_Show_Num(page,x,L_Num,size);
-    switch(size)
+        *buf_addr &= ~( 0xff << ofs );
+        *buf_addr |= (data << ofs);
+        buf_addr += 128;
+        ofs = 8 - ofs;
+        *buf_addr &= ~( 0xff >> ofs );
+        *buf_addr |= ( data >> ofs );
+    }else
     {
-        case 1: x += 6*(L_len+1); OLED12864_Show_Char(page,x,'.',size); x+=6; break;
-        case 2: x += 8*(L_len+1); OLED12864_Show_Char(page,x,'.',size); x+=8; break;
-        default:break;
-    }
-    while(d_len!=0)
-    {
-        R_Num*=10;
-        d_len--;
-    }
-    R_Num2 = (int)R_Num;
-    OLED12864_Show_Num(page,x,R_Num2,size);
-    return L_len+1+d_len;
-}
-
-void OLED12864_Show_String(uint8_t x,uint8_t y,char*str,uint8_t size)
-{
-    uint8_t sx = 0;
-    while(*str!='\0')
-    {
-        OLED12864_Show_Char(x+sx,y,*str,size);
-        switch(size)
-        {
-            case 1:
-                sx+=6;
-                break;
-            case 2:
-                sx+=8;
-                break;
-            default:
-                break;
-        }
-        str++;
+        *buf_addr = data;
     }
 }
-
-//像素点相关操作
-#if USE_POINT_CRT == 1
-
-void OLED12864_Draw_Point(uint8_t x,uint8_t y,uint8_t bit)
-{
-    if(y > y_MAX-1 || x > x_MAX-1)
-        return;
-    uint8_t page = y/8;
-    uint8_t col = y%8;
-    if(bit)
-        OLED12864_Sbuffer[page][x] |= (0x01<<col);
-    else
-        OLED12864_Sbuffer[page][x] &= ~(0x01<<col);
-}
-
-void OLED12864_Draw_Line(uint8_t x1,uint8_t y1,uint8_t x2,uint8_t y2)
-{
-    float k = (float)(y1 - y2) / (float)(x1 -x2);   //斜率
-    float k_1 = 1 / k;
-
-    float sx = x1;
-    float sy = y1;
-    while( sx != x2){
-        OLED12864_Draw_Point((int)sx,(int)sy,1);
-        if( sx < x2 ){
-            sx ++;
-            sy += k;
-        }else{
-            sx --;
-            sy -= k;
-        }
-    }
-
-    sx = x1;
-    sy = y1;
-    while( sy != y2 ){
-        OLED12864_Draw_Point((int)sx,(int)sy,1);
-        if( sy < y2 ){
-            sy ++;
-            sx += k_1;
-        }else{
-            sy --;
-            sx -= k_1;
-        }
-    }
-}
-
-void OLED12864_Draw_Rect(uint8_t x,uint8_t y,uint8_t len,uint8_t hight)
-{
-    for(uint8_t temp=0;temp<len;temp++)
-    {
-        OLED12864_Draw_Point(x+temp,y,1);
-        OLED12864_Draw_Point(x+temp,y+hight,1);
-    }
-    for(uint8_t temp=0;temp<hight;temp++)
-    {
-        OLED12864_Draw_Point(x,y+temp,1);
-        OLED12864_Draw_Point(x+len,y+temp,1);
-    }
-}
-
-void OLED12864_Draw_Img(uint8_t x,uint8_t y,uint8_t len,uint8_t hight,uint8_t*img)
-{
-    uint8_t sx,sy;
-    uint16_t dat_addr_pos;
-    uint8_t page_pos;
-    uint8_t bit_pos;
-    for(sy=0;sy<hight;sy++)
-    {
-        page_pos = sy/8;
-        bit_pos = sy%8;
-        for(sx=0;sx<len;sx++)
-        {
-            dat_addr_pos = page_pos*len + sx;
-            OLED12864_Draw_Point(sx+x,sy+y, *(img+dat_addr_pos) & ((0x80)>>bit_pos) );
-        }
-    }
-}
-
-void OLED12864_Draw_aImg(uint8_t x,uint8_t y,uint8_t*img)
-{
-    uint8_t len,hight;
-    uint8_t sx,sy;
-    uint16_t dat_addr_pos;
-    uint8_t page_pos;
-    uint8_t bit_pos;
-    len = *(img+3) + *(img+2)*256;
-    hight = *(img+5) + *(img+4)*256;
-    for(sy=0;sy<hight;sy++)
-    {
-        page_pos = sy/8;
-        bit_pos = sy%8;
-        for(sx=0;sx<len;sx++)
-        {
-            dat_addr_pos = page_pos*len + sx + 6;
-            OLED12864_Draw_Point(sx+x,sy+y, *(img+dat_addr_pos) & ((0x80)>>bit_pos) );
-        }
-    }
-}
-
-#endif  //USE_POINT_CRT

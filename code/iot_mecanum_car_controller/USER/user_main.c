@@ -41,21 +41,23 @@ void user_main()
 	bsp_init();
     hardware_init();
 
-    elog_init();
-    elog_set_text_color_enabled(true);
-    elog_output_lock_enabled(true);
-    for( uint8_t temp = 0 ; temp < 6 ; temp++ )
-        elog_set_fmt( temp , ~(ELOG_FMT_P_INFO) );
-    elog_start();
+    OLED12864_Test();
 
-    xTaskCreate( 
-        init_task ,
-        "sys_init_task",
-        128,
-        NULL,
-        15,
-        NULL
-    );
+    // elog_init();
+    // elog_set_text_color_enabled(true);
+    // elog_output_lock_enabled(true);
+    // for( uint8_t temp = 0 ; temp < 6 ; temp++ )
+    //     elog_set_fmt( temp , ~(ELOG_FMT_P_INFO) );
+    // elog_start();
 
-    vTaskStartScheduler();
+    // xTaskCreate( 
+    //     init_task ,
+    //     "sys_init_task",
+    //     128,
+    //     NULL,
+    //     15,
+    //     NULL
+    // );
+
+    // vTaskStartScheduler();
 }

@@ -12,5 +12,6 @@ void hardware_init(void)
 {
     esp32c3_init();
     OLED12864_Init();
+    OLED12864_DMA_Sync_Start();
 }
 
