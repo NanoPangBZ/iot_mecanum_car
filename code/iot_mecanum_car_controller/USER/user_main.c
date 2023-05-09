@@ -23,15 +23,17 @@ static void init_task( void* param )
     motion_control_start();
     hmi_start();
 
-    // beep_notice( BEEP_SYS_INIT_FINNISH );
+    motion_control_function_disable( TARGET_POSITION_ENABLE );
 
-    // vTaskDelay( 12000 / portTICK_PERIOD_MS );
+    beep_notice( BEEP_SYS_INIT_FINNISH );
 
-    // elog_info( "test" , "is a info log" );
-    // elog_warn( "test" , "is a warn log" );
-    // elog_error( "test" , "is a error log" );
-    // elog_debug( "test" , "is a debug log" );
-    // elog_flush();
+    while(1)
+    {
+        motion_set_target_speed( 0 , 800 , 0 , CAR_REF );
+        vTaskDelay( 1000 / portTICK_PERIOD_MS );
+        motion_set_target_speed( 0 , -800 , 0 ,CAR_REF );
+        vTaskDelay( 1000 / portTICK_PERIOD_MS );
+    }
 
     vTaskDelete( NULL );
 }

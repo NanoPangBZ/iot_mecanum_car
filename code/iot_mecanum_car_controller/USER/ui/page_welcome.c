@@ -2,6 +2,8 @@
 #include "hardware.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "motion_control.h"
+#include "isr.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -23,7 +25,10 @@ static void timer_handler( uint16_t ms )
     uint8_t buf[32];
     sprintf( (char*)buf , "time : %d s" , xTaskGetTickCount() * portTICK_PERIOD_MS / 1000 );
     OLED12864_Show_String( (char*)buf , 0 , 63 - 8 , ASSIC_8x6 );
-
+    sprintf( (char*)buf , "sf yaw : %.1f " , motion_get_yaw() );
+    OLED12864_Show_String( (char*)buf , 0 , 16 , ASSIC_8x6 );
+    sprintf( (char*)buf , "hd yaw : %.1f " , jy901s_yaw);
+    OLED12864_Show_String( (char*)buf , 0 , 32 , ASSIC_8x6 );
 }
 
 static void event_handler( gui_evt_t evt )

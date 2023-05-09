@@ -99,7 +99,7 @@ void _target_speed_set_task( void* param )
             err_yaw = target_yaw - motion_get_yaw();
             //机动过程中偏差大于0.5°时才开始修正航向角
             //待机状态下偏差大于2°时才开始修正航向角
-            threshold = motion_state ? 2 : 0.5;
+            threshold = motion_state ? 1 : 0.5;
             if( err_yaw < motion_state && err_yaw > -motion_state ) err_yaw = 0;
             else    PID_IncOperation( &yaw_pid , err_yaw );
             car_target_speed.cr_speed = yaw_pid.Output;
@@ -193,6 +193,11 @@ void motion_set_target_speed( float x , float y , float yaw_speed , position_ref
     if( ref == SOFT_REF )
     {
         
+    }else if( ref == CAR_REF )
+    {
+        car_target_speed.x_speed = x;
+        car_target_speed.y_speed = y;
+        car_target_speed.cr_speed = yaw_speed;
     }
 }
 
