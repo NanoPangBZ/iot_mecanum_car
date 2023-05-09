@@ -1,4 +1,4 @@
-#include "gui.h"
+#include "lori_gui.h"
 #include "hardware.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,6 +28,7 @@ static void timer_handler( uint16_t ms )
 
 static void event_handler( gui_evt_t evt )
 {
+    extern page_t home_page;
     gui_set_page( &home_page );
 }
 

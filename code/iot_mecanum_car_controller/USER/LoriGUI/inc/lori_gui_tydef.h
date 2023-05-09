@@ -1,7 +1,7 @@
-#ifndef _PAGE_DEFINE_H_
-#define _PAGE_DEFINE_H_
+#ifndef _LORI_GUI_TYDEF_H_
+#define _LORI_GUI_TYDEF_H_
 
-#include "gui.h"
+#include "lori_gui.h"
 
 typedef enum{
     GUI_EVT_NEXT,
@@ -17,8 +17,5 @@ typedef struct{
     void (*event_handle)( gui_evt_t evt );
 }page_t;
 
-extern const page_t welcome_page;
-extern const page_t home_page;
-
-#endif  //_PAGE_DEFINE_H_
+#endif  //_LORI_GUI_TYDEF_H_
 

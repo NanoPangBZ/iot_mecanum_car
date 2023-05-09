@@ -2,7 +2,7 @@
 #define _GUI_H_
 
 #include <stdint.h>
-#include "page_def.h"
+#include "lori_gui_tydef.h"
 
 void gui_init( const page_t* first_page );
 void gui_deinit( void );

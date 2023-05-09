@@ -1,4 +1,4 @@
-#include "gui.h"
+#include "lori_gui.h"
 
 static void init( void )
 {

@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "gui.h"
+#include "lori_gui.h"
 
 static const page_t* current_page = NULL;
 

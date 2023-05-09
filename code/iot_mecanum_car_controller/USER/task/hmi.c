@@ -5,7 +5,7 @@
 #include "isr.h"
 #include "bsp.h"
 #include "hardware.h"
-#include "gui.h"
+#include "lori_gui.h"
 
 #include "motion_control.h"
 
@@ -28,6 +28,7 @@ static void keyboard_task( void* param )
 static TaskHandle_t _oled_taskHandle = NULL;
 static void oled_task( void* param )
 {
+    extern page_t welcome_page;
     gui_init( &welcome_page );
     while(1)
     {
