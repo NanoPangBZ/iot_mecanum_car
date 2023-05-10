@@ -17,14 +17,19 @@
 #define PI  3.1415926
 
 static float programe_yaw_ofs;      //程序参考坐标系相对陀螺仪的偏移
-static float target_yaw = 0;        //目标航向角 -> 程序参考坐标系
-static float target_position[2];    //目标位置(位置控制模式下有效) -> 程序参考坐标系
-static float car_position[2];       //当前位置 -> 程序参考坐标系
-static uint8_t              motion_state = 0;   //0:待机 1:机动中
-static mecanum_constant_t   model = { 1 , 1 , 1 };      //脉轮运动学模型常数
-static mecanum_center_speed_t     car_target_speed = { 0 , 0 , 0 };  //小车最终合成的速度矢量 -> 小车坐标系
-static mecanum_center_speed_t     car_real_speed = { 0 , 0 , 0 };     //运动学正解实际轮子速度获得的当前小车运动矢量 -> 小车坐标系
+static uint8_t                      motion_state = 0;           //0:待机 1:机动中
+static mecanum_constant_t           model = { 1 , 1 , 1 };      //脉轮运动学模型常数
+static mecanum_center_speed_t       car_target_speed = { 0 , 0 , 0 };   //小车最终合成的速度矢量 -> 小车坐标系
+static mecanum_center_speed_t       car_real_speed = { 0 , 0 , 0 };     //运动学正解实际轮子速度获得的当前小车运动矢量 -> 小车坐标系
+static float                        car_position[2];       //当前位置 -> 程序参考坐标系
+
+//用户层设置
 static motion_control_function_t  motion_control_function = 0;
+static mecanum_center_speed_t   user_target_speed = { 0 , 0 , 0 };
+static position_reference_t     user_targer_speed_ref = CAR_REF;
+static float                    user_target_position[2] = { 0 , 0 };    //坐标系 - soft
+static float                    user_target_yaw = 0;
+
 
 //小车速度控制线程 -> 最终实现控制的线程
 static TaskHandle_t _car_speed_control_taskHandle = NULL;
@@ -94,26 +99,29 @@ void _target_speed_set_task( void* param )
     yaw_pid.Target = 0; //目标值始终为0
     while(1)
     {
-        if( motion_control_function & YAW_LOCK_ENABLE )
+        if( motion_control_function & TARGET_POSITION )
         {
-            err_yaw = target_yaw - motion_get_yaw();
-            //机动过程中偏差大于0.5°时才开始修正航向角
-            //待机状态下偏差大于2°时才开始修正航向角
-            threshold = motion_state ? 1 : 0.5;
-            if( err_yaw < motion_state && err_yaw > -motion_state ) err_yaw = 0;
-            else    PID_IncOperation( &yaw_pid , err_yaw );
-            car_target_speed.cr_speed = yaw_pid.Output;
-        }
-
-        if( motion_control_function & TARGET_POSITION_ENABLE )
-        {
-            if( motion_control_function & POSITION_PID_ENABLE )
+            if( motion_control_function & POSITION_PID )
             {
 
             }else
             {
                 
             }
+        }else
+        {
+            car_target_speed = user_target_speed;
+        }
+        
+        if( motion_control_function & YAW_LOCK )
+        {
+            err_yaw = user_target_yaw - motion_get_yaw();
+            //机动过程中偏差大于0.5°时才开始修正航向角
+            //待机状态下偏差大于2°时才开始修正航向角
+            threshold = motion_state ? 1 : 0.5;
+            if( err_yaw < motion_state && err_yaw > -motion_state ) err_yaw = 0;
+            else    PID_IncOperation( &yaw_pid , err_yaw );
+            car_target_speed.cr_speed = yaw_pid.Output;
         }
 
         vTaskDelayUntil( &time , 50 / portTICK_PERIOD_MS );
@@ -125,7 +133,7 @@ void motion_control_start()
     if( _car_speed_control_taskHandle ) return;
 
     motion_reset_yaw();
-    motion_control_function_enable( ENABLE_ALL );
+    motion_control_function_enable( FUNC_ALL );
 
     xTaskCreate(
         car_speed_control_task,
@@ -179,32 +187,30 @@ void motion_set_target_position( float x , float y , position_reference_t ref )
 {
     if( ref == SOFT_REF)
     {
-        target_position[0] = x;
-        target_position[1] = y;
+        user_target_position[0] = x;
+        user_target_position[1] = y;
     }else if( ref == CAR_REF )
     {
-        target_position[0] = ( x - car_position[0] ) * cos( motion_get_yaw() * ( PI / 180 ) ) ;
-        target_position[1] = ( x - car_position[1] ) * sin( motion_get_yaw() * ( PI / 180 ) ) ;
+        user_target_position[0] = ( x - car_position[0] ) * cos( motion_get_yaw() * ( PI / 180 ) ) ;
+        user_target_position[1] = ( x - car_position[1] ) * sin( motion_get_yaw() * ( PI / 180 ) ) ;
+    }else if( ref == TARGET_POSITION )
+    {
+        user_target_position[0] = x + car_position[0];
+        user_target_position[1] = y + car_position[1];
     }
 }
 
 void motion_set_target_speed( float x , float y , float yaw_speed , position_reference_t ref )
 {
-    if( ref == SOFT_REF )
-    {
-        
-    }else if( ref == CAR_REF )
-    {
-        car_target_speed.x_speed = x;
-        car_target_speed.y_speed = y;
-        car_target_speed.cr_speed = yaw_speed;
-    }
+    user_targer_speed_ref = ref;
+    car_target_speed.x_speed = x;
+    car_target_speed.y_speed = y;
+    car_target_speed.cr_speed = yaw_speed;
 }
 
 void motion_reset_position( void )
 {
-    target_position[0] += car_position[0];
-    target_position[1] += car_position[1];
+    user_target_position[0] = user_target_position[1] = 0;
     car_position[0] = car_position[1] = 0;
 }
 
@@ -212,18 +218,18 @@ void motion_get_target_position( float* x , float*y , position_reference_t ref )
 {
     if( ref == SOFT_REF )
     {
-        *x = target_position[0];
-        *y = target_position[1];
+        *x = user_target_position[0];
+        *y = user_target_position[1];
     }else if( ref == CAR_REF )
     {
-        *x = ( target_position[0] - car_position[0] ) * cos( motion_get_yaw() * ( PI / 180 ) );
-        *y = ( target_position[1] - car_position[1] ) * sin( motion_get_yaw() * ( PI / 180 ) );
+        *x = ( user_target_position[0] - car_position[0] ) * cos( motion_get_yaw() * ( PI / 180 ) );
+        *y = ( user_target_position[1] - car_position[1] ) * sin( motion_get_yaw() * ( PI / 180 ) );
     }
 }
 
 void motion_set_target_yaw( float yaw )
 {
-    target_yaw = yaw;
+    user_target_yaw = yaw;
 }
 
 void motion_control_function_enable( motion_control_function_t function )
@@ -243,6 +249,19 @@ motion_control_function_t motion_get_control_function( void )
 
 void motion_get_position( float* x , float* y , position_reference_t ref)
 {
-    *x = target_position[0];
-    *y = target_position[1];
+    switch( ref )
+    {
+        case SOFT_REF:
+            *x = car_position[0];
+            *y = car_position[1];
+        break;
+        case CAR_REF:
+            *x = 0;
+            *y = 0;
+        break;
+        case TARGET_REF:
+            *x = user_target_position[0] - car_position[0];
+            *y = user_target_position[1] - car_position[1];
+        break;
+    }   
 }

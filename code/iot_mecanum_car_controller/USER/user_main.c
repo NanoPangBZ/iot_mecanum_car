@@ -23,17 +23,10 @@ static void init_task( void* param )
     motion_control_start();
     hmi_start();
 
-    motion_control_function_disable( TARGET_POSITION_ENABLE );
+    motion_control_function_disable( YAW_LOCK );
+    motion_control_function_disable( TARGET_POSITION );
 
     beep_notice( BEEP_SYS_INIT_FINNISH );
-
-    while(1)
-    {
-        motion_set_target_speed( 0 , 800 , 0 , CAR_REF );
-        vTaskDelay( 1000 / portTICK_PERIOD_MS );
-        motion_set_target_speed( 0 , -800 , 0 ,CAR_REF );
-        vTaskDelay( 1000 / portTICK_PERIOD_MS );
-    }
 
     vTaskDelete( NULL );
 }

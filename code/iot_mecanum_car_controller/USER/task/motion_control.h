@@ -9,10 +9,10 @@ typedef enum{
 }position_reference_t;
 
 typedef enum{
-    YAW_LOCK_ENABLE = (1<<0),
-    TARGET_POSITION_ENABLE = (1<<1),
-    POSITION_PID_ENABLE = (1<<2),
-    ENABLE_ALL = 0xff
+    YAW_LOCK = (1<<0),
+    TARGET_POSITION = (1<<1),
+    POSITION_PID = (1<<2),
+    FUNC_ALL = 0xff
 }motion_control_function_t;
 
 //运动控制模块开关
