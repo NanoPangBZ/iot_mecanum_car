@@ -50,6 +50,6 @@
     - 模态量 byte1
       - bit0 1:yaw航向角锁定 0:yaw航向角不锁定
       - bit11:
-- 负载长度字节 1Byte
+- 负载长度字节 2Byte
 - 负载 n Bytes
-- 校验位 2 Bytes CRC16取反
+- 校验位 2 Bytes CRC8取反

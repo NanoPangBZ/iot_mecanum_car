@@ -10,6 +10,7 @@ typedef enum{
     RESERVE1 = (0x01<<5),
     RESERVE2 = (0x01<<6),
     RESERVE3 = (0x01<<7),
+    NONE_DEVICE = 0x00
 }scp_device_bit_t;
 
 #endif  //_SCP_TRANS_DEV_H_
