@@ -24,15 +24,15 @@ int scp_send_port( uint8_t* buf , uint16_t len )
 int main(  )
 {
     uint8_t* pack_buf = new uint8_t[1024];
-    auto pack = scp_pack_create( pack_buf , 1024 );
-    auto decoder = scp_decoder_create( &pack , NULL );
+    auto pack = scp_trans_pack_create( pack_buf , 1024 );
+    auto decoder = scp_trans_decoder_create( &pack , NULL );
     uint8_t test[64] = {
         0xEA , 0xAF ,   //头
         0x00 , 0x00,    //控制
         0x00 , 0x00 , 0x00, //命令 长度
         0xaa , 0xcc //校验
     };
-    scp_decoder_input( &decoder , test , 8 );
+    scp_trans_decoder_input( &decoder , test , 8 );
     system("pause");
     return 0;
 }
