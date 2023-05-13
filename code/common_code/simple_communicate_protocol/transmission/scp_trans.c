@@ -60,7 +60,7 @@ int scp_trans_send( scp_pack_t* pack , scp_trans_port port)
     }
     crc_value = ~crc_value;
     crc_addr[0] = crc_value>>8;
-    crc_addr[1] = crc_value;
+    crc_addr[1] = crc_value&0x00FF;
 
     return port( pack->payload.buf , PACK_FIXED_LEN + pack->payload_len );
 }
@@ -77,7 +77,7 @@ void scp_trans_decoder_error_handler( scp_trans_decoder_t* decoder , uint8_t cu_
     {
         if( cu_byte != PACK_HEAD_H )
             scp_trans_decoder_reset( decoder );
-    }else if( decoder->decode_state == 7 )
+    }else if( decoder->decode_state == 7 || decoder->decode_state == 10 )
     {
         //重置解码器 使用编码器在接收缓存中寻找下一个帧头
         scp_trans_decoder_reset( decoder );
@@ -129,9 +129,12 @@ void scp_trans_decoder_input_byte( scp_trans_decoder_t* decoder , uint8_t byte )
             }
             break;
         case 1:
-            if( byte == PACK_HEAD_L ) decoder->decode_state++;
+            if( byte == PACK_HEAD_L )
+            {
+                decoder->decode_state++;
+                decoder->crc_cal += byte;
+            }
             else scp_trans_decoder_error_handler( decoder , byte );
-            decoder->crc_cal += byte;
             break;
 
         //控制字
