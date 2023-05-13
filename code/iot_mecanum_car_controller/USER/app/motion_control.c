@@ -12,6 +12,10 @@
 
 #include <math.h>
 
+#define SPEED_PID_P 28
+#define SPEED_PID_I 22
+#define SPEED_PID_D 18
+
 #define WHELL_SPEED_MIN 100
 #define WHELL_SPEED_MAX 3000
 #define PI  3.1415926

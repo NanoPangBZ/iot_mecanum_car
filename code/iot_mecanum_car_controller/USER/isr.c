@@ -1,17 +1,15 @@
 #include "stm32f1xx_hal.h"
 
-#include "adc.h"
-
 #include "bsp.h"
 #include "protocol.h"
+#include "iot.h"
 
 //串口1接收缓存
 uint8_t u1_rx[64];
 uint8_t u1_rx_len = 0;
 
 //串口3接收缓存
-uint8_t u3_rx[64];
-uint8_t u3_rx_len = 0;
+uint8_t u3_rx;
 
 //串口5接收缓存 - 同步处理JY901S
 uint8_t u5_rx;
@@ -39,13 +37,15 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     if( huart == &huart3 )
     {
-        u3_rx_len++;
-        if( u3_rx_len > 63 )
-        {
-            bsp_uart_receive( huart , u3_rx + 63 , 1 );
-        }else{
-            bsp_uart_receive( huart , u3_rx + u3_rx_len , 1 );
-        }
+        iot_port_input( u3_rx );
+        bsp_uart_receive( huart , &u3_rx , 1 );
+        // u3_rx_len++;
+        // if( u3_rx_len > 63 )
+        // {
+        //     bsp_uart_receive( huart , u3_rx + 63 , 1 );
+        // }else{
+        //     bsp_uart_receive( huart , u3_rx + u3_rx_len , 1 );
+        // }
     }else if( huart == &huart5 )
     {
         //处理JY901S数据

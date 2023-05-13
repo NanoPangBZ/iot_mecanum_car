@@ -45,7 +45,7 @@ int scp_trans_send( scp_pack_t* pack , scp_trans_port port)
     memcpy( buf_addr + PACK_PAYLOAD_INDEX , buf_addr , pack->payload_len );
     buf_addr[0] = PACK_HEAD_H;
     buf_addr[1] = PACK_HEAD_L;
-    buf_addr[2] = pack->control_word << 8;
+    buf_addr[2] = pack->control_word >> 8;
     buf_addr[3] = pack->control_word;
     buf_addr[4] = pack->cmd_word;
     // buf_addr[5] = ( pack->payload_len & 0x0ff0 ) >> 4;
@@ -196,7 +196,7 @@ void scp_trans_decoder_input_byte( scp_trans_decoder_t* decoder , uint8_t byte )
         //接收crc值
         case 8:
             decoder->crc_rec = byte;
-            decoder->crc_rec <<= byte;
+            decoder->crc_rec <<= 8;
             decoder->decode_state++;
             break;
         case 9:
@@ -207,7 +207,8 @@ void scp_trans_decoder_input_byte( scp_trans_decoder_t* decoder , uint8_t byte )
 
     if( decoder->decode_state == 10 )
     {
-        if( decoder->crc_cal == ~decoder->crc_rec )
+        decoder->crc_cal =~ decoder->crc_cal;
+        if( decoder->crc_cal == decoder->crc_rec )
         {
             if( decoder->cb != NULL )
                 decoder->cb( pack );

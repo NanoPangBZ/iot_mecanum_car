@@ -123,5 +123,3 @@ void hmi_start( void )
         &_beep_taskHandle
     );
 }
-
-
