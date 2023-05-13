@@ -225,6 +225,6 @@ void scp_trans_decoder_input_byte( scp_trans_decoder_t* decoder , uint8_t byte )
 
 void scp_trans_decoder_input( scp_trans_decoder_t* decoder , uint8_t* buf , uint16_t len )
 {
-    for( uint8_t temp = 0 ; temp < len ; temp++ )
+    for( uint16_t temp = 0 ; temp < len ; temp++ )
         scp_trans_decoder_input_byte( decoder , buf[temp] );
 }
