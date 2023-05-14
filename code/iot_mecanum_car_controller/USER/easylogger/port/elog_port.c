@@ -61,9 +61,11 @@ void elog_port_deinit(void) {
  * @param size log size
  */
 void elog_port_output(const char *log, size_t size) {
-    
-    /* add your code here */
-    CDC_Transmit_FS( (uint8_t*)log , (uint16_t)size );
+    while( CDC_Transmit_FS( (uint8_t*)log , (uint16_t)size ) == USBD_BUSY )
+    {
+        if( taskSCHEDULER_RUNNING == xTaskGetSchedulerState() )
+            taskYIELD();    //让出时间片
+    }
 }
 
 /**
