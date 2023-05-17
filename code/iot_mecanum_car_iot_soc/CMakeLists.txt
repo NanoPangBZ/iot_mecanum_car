@@ -3,4 +3,5 @@
 cmake_minimum_required(VERSION 3.5)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+set( EXTRA_COMPONENT_DIRS ../common_code/simple_communicate_protocol )
 project(iot_mecanum_car_iot_soc)
