@@ -35,14 +35,24 @@ extern "C" void app_main(void)
     SysLed::sysLed.start();
 
     bsp_wifi_init();
+    bsp_uart_init();
 
-    if( !bsp_wifi_connect( "MOSS(4316)" , "4316yyds" ) )
-    {
-        tcpServer.start( 144 , tcpApp , 4096 );
-    }
+    // if( !bsp_wifi_connect( "MOSS(4316)" , "4316yyds" ) )
+    // {
+    //     tcpServer.start( 144 , tcpApp , 4096 );
+    // }
+
+    // while(1)
+    // {
+    //     vTaskDelay(1);
+    // }
+
+    uint8_t temp[64];
 
     while(1)
     {
-        vTaskDelay(1);
+        bsp_uart_send( (uint8_t*)"HelloWorld!" , strlen("HelloWorld!") );
+        ESP_LOGI( TAG , "recier func return  code : %d " , bsp_uart_recieve( temp , 60 , 10 ) );
+        vTaskDelay( 1000 / portTICK_PERIOD_MS );
     }
 }

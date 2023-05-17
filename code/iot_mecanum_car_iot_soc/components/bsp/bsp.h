@@ -3,6 +3,7 @@
 
 #include "bsp_wifi.h"
 #include "SysLed.h"
+#include "bsp_uart.h"
 
 #ifdef __cplusplus
 extern "C"
