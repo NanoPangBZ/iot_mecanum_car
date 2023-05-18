@@ -35,6 +35,10 @@ public:
     TcpServer();
     ~TcpServer();
     bool start( uint16_t listen_port , TcpApp app , uint16_t app_stack );
+    /**
+     * @note stop函数存在缺陷!TcpApp无法感知服务即将停止，可能导致TcpApp无法完成回收!!
+     * @anchor 庞 23/5/18
+    */
     bool stop();
 private:
     static void _serverListen( void* param );
