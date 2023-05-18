@@ -1,14 +1,19 @@
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/semphr.h"
 
 #include "bsp.h"
 #include "TcpServer.h"
+#include "scp_trans.h"
 
 #include "esp_log.h"
 #define TAG "main"
 
-void tcpApp( int sock )
+static void uart_send_scp_pack( scp_pack_t* pack );
+static SemaphoreHandle_t uart_tx_lock = NULL;
+
+static void tcpApp( int sock )
 {
     uint8_t buf[512];
     int len = 0;
@@ -21,11 +26,36 @@ void tcpApp( int sock )
             ESP_LOGI( TAG , "client logoff");
             return;
         }
-
         send(sock, buf ,  len , 0);
         ESP_LOGI( TAG , "Tick" );
-        vTaskDelay( 1000 / portTICK_PERIOD_MS );
     }
+}
+
+static int scp_recieve_respond( scp_pack_t* pack )
+{
+    return 0;
+}
+
+void uart_recieve_decoder_task( void* param )
+{
+    uint8_t recieve_buf[512];
+    uint8_t decoder_buf[512];
+    int count = 0;
+    scp_pack_t pack = scp_trans_pack_create( decoder_buf , 512 );
+    scp_trans_decoder_t decoder = scp_trans_decoder_create( &pack , scp_recieve_respond );
+    while(1)
+    {
+        count = bsp_uart_recieve( recieve_buf , 64 , 20 );
+        if( count > 0 )
+            scp_trans_decoder_input( &decoder , recieve_buf , count );
+    }
+}
+
+static void uart_send_scp_pack( scp_pack_t* pack )
+{
+    xSemaphoreTake( uart_tx_lock , -1 );
+    scp_trans_send( pack , bsp_uart_send );
+    xSemaphoreGive( uart_tx_lock );
 }
 
 extern "C" void app_main(void)
@@ -37,9 +67,11 @@ extern "C" void app_main(void)
     bsp_wifi_init();
     bsp_uart_init();
 
+    uart_tx_lock = xSemaphoreCreateBinary();
+
     // if( !bsp_wifi_connect( "MOSS(4316)" , "4316yyds" ) )
     // {
-    //     tcpServer.start( 144 , tcpApp , 4096 );
+        // tcpServer.start( 144 , tcpApp , 4096 );
     // }
 
     // while(1)
