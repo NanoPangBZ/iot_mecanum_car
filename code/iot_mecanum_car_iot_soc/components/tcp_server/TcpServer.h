@@ -14,10 +14,11 @@
 
 class TcpServer;
 
+typedef int (*TcpApp_Init)( int sock );
 typedef void (*TcpApp)( int sock );
+typedef void (*TcpApp_Deinit)( int sock );
 
 typedef struct{
-    TcpApp _app;
     int sock;
     int keepAlive;
     int keepIdle;
@@ -34,11 +35,26 @@ class TcpServer{
 public:
     TcpServer();
     ~TcpServer();
-    bool start( uint16_t listen_port , TcpApp app , uint16_t app_stack );
+
     /**
-     * @note stop函数存在缺陷!TcpApp无法感知服务即将停止，可能导致TcpApp无法完成回收!!
-     * @anchor 庞 23/5/18
+     * @brief 启动tcp服务
+     * @param listen_port 要监听的端口
+     * @param init_func 业务逻初始化函数
+     * @param app_func 业务逻辑
+     * @param deinit_func 业务逻辑逆初始化函数
+     * @param app_stack_size 要为每个业务逻辑分配的任务堆栈大小
+     * @note    这个接口会在后台启动一个监听任务，当监听到有tcp客户端连接后，
+     *          会创建一个用于处理这个客户端请求的任务，这个任务首先会调用初
+     *          始化函数，然后进入app_func，当app_func退出后调用逆初始化函数
+     *          。这个接口能支持多客户端连接，通过传入的sock区分不同的客户端。
+     * @anchor 庞 2023/5/19
     */
+    bool start( uint16_t listen_port ,
+                TcpApp_Init init_func,
+                TcpApp app_func ,
+                TcpApp_Deinit deinit_func ,
+                uint16_t app_stack_size );
+
     bool stop();
 private:
     static void _serverListen( void* param );
@@ -46,8 +62,10 @@ private:
     
     TaskHandle_t _listenTask;
     int listen_sock;
-    uint16_t _appStack;
+    uint16_t _appStackSize;
+    TcpApp_Init _appInit;
     TcpApp _app;
+    TcpApp_Deinit _appDeinit;
     uint16_t _listenPort;
     int _connectCount;   //连接数量
     std::list<TcpServerAppCtx*> tcpServerAppList;

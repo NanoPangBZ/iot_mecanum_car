@@ -66,7 +66,6 @@ void TcpServer::_serverListen( void* param )
         }else{
             //初始化app上下文
             TcpServerAppCtx* ctx = new TcpServerAppCtx;
-            ctx->_app = tcpServer->_app;
             ctx->sock = sock;
             ctx->keepAlive = 1;
             ctx->keepIdle = KEEPALIVE_IDLE;
@@ -83,7 +82,7 @@ void TcpServer::_serverListen( void* param )
             xTaskCreatePinnedToCore( 
                 _serverAppBridge ,
                 "tcp server app",
-                tcpServer->_appStack,
+                tcpServer->_appStackSize,
                 (void*)ctx,
                 12,
                 &ctx->taskHandle,
@@ -114,7 +113,12 @@ void TcpServer::_serverAppBridge(void* param)
     setsockopt(sock, IPPROTO_TCP, TCP_KEEPINTVL, &ctx->keepInterval, sizeof(int));
     setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT, &ctx->keepCount, sizeof(int));
     
-    ctx->_app( ctx->sock );
+    if( server->_appInit( ctx->sock ) != 0 )
+        ESP_LOGE( TAG , "tcp server app init error , tcp client : %s " , ctx->ipAddrStr);
+    else
+        ESP_LOGI( TAG , "tcp server app init pass." );
+    server->_app( ctx->sock );
+    server->_appDeinit( ctx->sock );
 
     xSemaphoreTake( server->appLock , -1 );
     shutdown(ctx->sock, 0);
@@ -126,14 +130,17 @@ void TcpServer::_serverAppBridge(void* param)
     ESP_LOGI( TAG , "tcp server bridge exit" );
     vTaskDelete( NULL );
 }
-
-bool TcpServer::start( uint16_t listen_port , TcpApp app , uint16_t stack )
+bool TcpServer::start(  uint16_t listen_port , 
+                        TcpApp_Init init_func, 
+                        TcpApp app_func , 
+                        TcpApp_Deinit deinit_func ,
+                        uint16_t app_stack_size )
 {
     if( _listenTask != NULL )
         return false;
 
-    _app = app;
-    _appStack = stack;
+    _app = app_func;
+    _appStackSize = app_stack_size;
     _listenPort = listen_port;
 
     xTaskCreatePinnedToCore(
@@ -160,6 +167,7 @@ bool TcpServer::stop()
     //杀死和回收正在运行的客户端处理任务
     for( std::list<TcpServerAppCtx*>::iterator it = tcpServerAppList.begin() ; it != tcpServerAppList.end() ; it++ )
     {
+        _appDeinit( (*it)->sock );
         shutdown( (*it)->sock, 0);
         close( (*it)->sock);
         if( (*it)->taskHandle )
@@ -177,7 +185,9 @@ bool TcpServer::stop()
 
 TcpServer::TcpServer()
 {
+    _appDeinit = NULL;
     _app = NULL;
+    _appInit = NULL;
     _connectCount = 0;
     _listenTask = NULL;
     appLock = xSemaphoreCreateBinary();
