@@ -14,9 +14,9 @@
 
 class TcpServer;
 
-typedef int (*TcpApp_Init)( int sock );
-typedef void (*TcpApp)( int sock );
-typedef void (*TcpApp_Deinit)( int sock );
+typedef void* (*TcpApp_Init)( int sock );
+typedef void (*TcpApp)( int sock , void* user);
+typedef void (*TcpApp_Deinit)( int sock , void* user);
 
 typedef struct{
     int sock;
@@ -29,6 +29,7 @@ typedef struct{
     struct sockaddr_in peerAddr;
     int peer_len;
     char ipAddrStr[INET_ADDRSTRLEN];
+    void* user;
 }TcpServerAppCtx;
 
 class TcpServer{
@@ -39,7 +40,7 @@ public:
     /**
      * @brief 启动tcp服务
      * @param listen_port 要监听的端口
-     * @param init_func 业务逻初始化函数
+     * @param init_func 用户业务逻上下文初始化函数,这个函数需要返回user指针
      * @param app_func 业务逻辑
      * @param deinit_func 业务逻辑逆初始化函数
      * @param app_stack_size 要为每个业务逻辑分配的任务堆栈大小

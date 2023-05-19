@@ -113,12 +113,9 @@ void TcpServer::_serverAppBridge(void* param)
     setsockopt(sock, IPPROTO_TCP, TCP_KEEPINTVL, &ctx->keepInterval, sizeof(int));
     setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT, &ctx->keepCount, sizeof(int));
     
-    if( server->_appInit( ctx->sock ) != 0 )
-        ESP_LOGE( TAG , "tcp server app init error , tcp client : %s " , ctx->ipAddrStr);
-    else
-        ESP_LOGI( TAG , "tcp server app init pass." );
-    server->_app( ctx->sock );
-    server->_appDeinit( ctx->sock );
+    ctx->user = server->_appInit( ctx->sock );
+    server->_app( ctx->sock , ctx->user);
+    server->_appDeinit( ctx->sock , ctx->user);
 
     xSemaphoreTake( server->appLock , -1 );
     shutdown(ctx->sock, 0);
@@ -167,7 +164,7 @@ bool TcpServer::stop()
     //杀死和回收正在运行的客户端处理任务
     for( std::list<TcpServerAppCtx*>::iterator it = tcpServerAppList.begin() ; it != tcpServerAppList.end() ; it++ )
     {
-        _appDeinit( (*it)->sock );
+        _appDeinit( (*it)->sock , (*it)->user );
         shutdown( (*it)->sock, 0);
         close( (*it)->sock);
         if( (*it)->taskHandle )
