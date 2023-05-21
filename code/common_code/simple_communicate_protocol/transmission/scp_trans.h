@@ -9,10 +9,10 @@
 #include <stdint.h>
 #include "scp_trans_dev.h"
 
-#ifdef __cplusplis
+#ifdef __cplusplus
 extern "C"
 {
-#endif  //__cplusplis
+#endif  //__cplusplus
 
 typedef struct{
     uint8_t* buf;
@@ -49,9 +49,9 @@ void scp_trans_decoder_reset( scp_trans_decoder_t* decoder );
 void scp_trans_decoder_input_byte( scp_trans_decoder_t* decoder , uint8_t byte );
 void scp_trans_decoder_input( scp_trans_decoder_t* decoder , uint8_t* buf , uint16_t len );
 
-#ifdef __cplusplis
+#ifdef __cplusplus
 }
-#endif  //__cplusplis
+#endif  //__cplusplus
 
 
 #endif  //_SCP_TRANS_H_
