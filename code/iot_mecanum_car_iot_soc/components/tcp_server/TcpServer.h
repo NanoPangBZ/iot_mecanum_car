@@ -18,20 +18,6 @@ typedef void* (*TcpApp_Init)( int sock );
 typedef void (*TcpApp)( int sock , void* user);
 typedef void (*TcpApp_Deinit)( int sock , void* user);
 
-typedef struct{
-    int sock;
-    int keepAlive;
-    int keepIdle;
-    int keepInterval;
-    int keepCount;
-    TaskHandle_t taskHandle;
-    TcpServer*  server;
-    struct sockaddr_in peerAddr;
-    int peer_len;
-    char ipAddrStr[INET_ADDRSTRLEN];
-    void* user;
-}TcpServerAppCtx;
-
 class TcpServer{
 public:
     TcpServer();
@@ -61,6 +47,20 @@ private:
     static void _serverListen( void* param );
     static void _serverAppBridge(void* param);
     
+    typedef struct{
+        int sock;
+        int keepAlive;
+        int keepIdle;
+        int keepInterval;
+        int keepCount;
+        TaskHandle_t taskHandle;
+        TcpServer*  server;
+        struct sockaddr_in peerAddr;
+        int peer_len;
+        char ipAddrStr[INET_ADDRSTRLEN];
+        void* user;
+    }TcpServerAppCtx;
+
     TaskHandle_t _listenTask;
     int listen_sock;
     uint16_t _appStackSize;
