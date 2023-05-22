@@ -45,6 +45,23 @@ static void tcpApp( int sock )
 
 static int scp_recieve_respond( scp_pack_t* pack )
 {
+    ESP_LOGI( TAG , "scp pack recieve respodn" );
+    printf("pack printf.\n");
+    printf( "control word: 0x%04X\n" , pack->control_word );
+    printf( "cmd word: 0x%02x\n" , pack->cmd_word );
+    printf( "param:\n" );
+    int index = 0;
+    while( index < pack->payload_len )
+    {
+        for( int line_c = 0 ; line_c < 16 ; line_c++ )
+        {
+            if( index < pack->payload_len )
+                printf( "0x%02X  " , pack->payload.buf[index] );
+            index ++;
+        }
+        printf("\n");
+    }
+    printf("\n");
     return 0;
 }
 
@@ -66,7 +83,10 @@ static void uart_recieve_decode_task( void* param )
     {
         count = bsp_uart_recieve( recieve_buf , 64 , 20 );
         if( count > 0 )
+        {
             scp_trans_decoder_input( &decoder , recieve_buf , count );
+            ESP_LOGI( TAG , "recieve form uart %d bytes" , count );
+        }
     }
 }
 
@@ -102,14 +122,14 @@ extern "C" void app_main(void)
     xTaskCreatePinnedToCore(
         uart_recieve_decode_task,
         "uart rx",
-        512,
+        3072,
         NULL,
         13,
         NULL,
         tskNO_AFFINITY
     );
 
-    while( bsp_wifi_connect( "MOSS(4316)" , "4316yyds" ) != 0 )
+    while( bsp_wifi_connect( "test" , "09296666" ) != 0 )
     {
         ESP_LOGI( TAG , "retry to connect wifi." );
         vTaskDelay( 500 / portTICK_PERIOD_MS );
