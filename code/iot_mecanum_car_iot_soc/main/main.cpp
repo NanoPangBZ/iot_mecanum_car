@@ -13,6 +13,9 @@
 static TcpServer tcpServer;
 static void uart_send_scp_pack( scp_pack_t* pack );
 static int tcp_send( uint8_t* data , uint16_t len );
+static int scp_recieve_respond( scp_pack_t* pack );
+static void uart_recieve_decode_task( void* param );
+static void send_scp_pack( scp_pack_t* pack );
 static SemaphoreHandle_t uart_tx_lock = NULL;
 static SemaphoreHandle_t tcp_tx_lock = NULL;
 static int _s_sock = -1;
@@ -20,6 +23,9 @@ static int _s_sock = -1;
 static void tcpApp( int sock )
 {
     uint8_t buf[512];
+    uint8_t decoder_buf[512];
+    scp_pack_t pack = scp_trans_pack_create( decoder_buf , 512 );
+    scp_trans_decoder_t decoder = scp_trans_decoder_create( &pack , scp_recieve_respond );
     int len = 0;
     _s_sock = sock;
     while(1)
@@ -31,7 +37,8 @@ static void tcpApp( int sock )
             ESP_LOGI( TAG , "client logoff");
             return;
         }
-        send(sock, buf ,  len , 0);
+        scp_trans_decoder_input( &decoder , buf , len );
+        // send(sock, buf ,  len , 0);
         ESP_LOGI( TAG , "Tick" );
     }
 }
@@ -48,7 +55,7 @@ static int tcp_send( uint8_t* data , uint16_t len )
     return -1;
 }
 
-static void uart_recieve_decoder_task( void* param )
+static void uart_recieve_decode_task( void* param )
 {
     uint8_t recieve_buf[512];
     uint8_t decoder_buf[512];
@@ -63,20 +70,21 @@ static void uart_recieve_decoder_task( void* param )
     }
 }
 
-static void uart_send_scp_pack( scp_pack_t* pack )
+static void send_scp_pack( scp_pack_t* pack )
 {
-    xSemaphoreTake( uart_tx_lock , -1 );
-    scp_trans_send( pack , bsp_uart_send );
-    xSemaphoreGive( uart_tx_lock );
-}
-
-static void tcp_send_scp_pack( scp_pack_t* pack )
-{
-    if( _s_sock != -1 )
+    if( pack->control_word )
     {
-        xSemaphoreTake( tcp_tx_lock , -1 );
-        scp_trans_send( pack , tcp_send );
-        xSemaphoreGive( tcp_tx_lock );
+        xSemaphoreTake( uart_tx_lock , -1 );
+        scp_trans_send( pack , bsp_uart_send );
+        xSemaphoreGive( uart_tx_lock );
+    }else
+    {
+        if( _s_sock != -1 )
+        {
+            xSemaphoreTake( tcp_tx_lock , -1 );
+            scp_trans_send( pack , tcp_send );
+            xSemaphoreGive( tcp_tx_lock );
+        }
     }
 }
 
@@ -90,6 +98,16 @@ extern "C" void app_main(void)
 
     uart_tx_lock = xSemaphoreCreateBinary();
     tcp_tx_lock = xSemaphoreCreateBinary();
+
+    xTaskCreatePinnedToCore(
+        uart_recieve_decode_task,
+        "uart rx",
+        512,
+        NULL,
+        13,
+        NULL,
+        tskNO_AFFINITY
+    );
 
     while( bsp_wifi_connect( "MOSS(4316)" , "4316yyds" ) != 0 )
     {
