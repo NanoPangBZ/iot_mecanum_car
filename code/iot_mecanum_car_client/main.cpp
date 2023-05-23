@@ -3,7 +3,6 @@
 #include <QQmlContext>
 
 #include "BackendThread.h"
-#include "TcpClient\TcpClient.h"
 
 QObject* qmlObj = 0;
 

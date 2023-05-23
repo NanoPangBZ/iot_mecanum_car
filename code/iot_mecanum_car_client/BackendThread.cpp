@@ -1,13 +1,19 @@
 #include "BackendThread.h"
 #include <windows.h>
 #include <QVariant>
+#include <QQuickItem>
 #include <math.h>
+
+#include "TcpClient/TcpClient.h"
 
 //唯一实例
 BackendThread BackendThread::backendThread;
 
 //UI对象
 extern QObject* qmlObj;
+
+//静态变量
+static TcpClient* client = NULL;
 
 //后台线程
 void* BackendThread::_main(void*param)
@@ -20,9 +26,7 @@ void* BackendThread::_main(void*param)
     float t = 0;
     while(1)
     {
-        backendThread.updataCarPosition( sin( t ) * 300 , cos( t ) * 300 , sin(t*2) * 180 );
-        t += 0.01;
-        Sleep(10);
+        Sleep(200);
     }
     return param;
 }
@@ -46,8 +50,25 @@ void BackendThread::targetPositionRefresh( float x , float y )
 {
 }
 
-void BackendThread::autoConnectCar()
+void BackendThread::connectCar( QString addr )
 {
+    if( client != NULL )
+    {
+        delete client;
+        client = NULL;
+    }
+
+    client = new TcpClient;
+    if( client->connect( addr.toLocal8Bit().data() , 144 ) )
+    {
+        qDebug("连接成功 %s" , addr.toLocal8Bit().data());
+    }else
+    {
+        qDebug( "连接失败" );
+        delete client;
+        client = NULL;
+    }
+    Sleep( 2000 );
 }
 
 void BackendThread::carYawModeRefresh( int mode )

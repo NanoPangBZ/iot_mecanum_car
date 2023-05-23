@@ -9,6 +9,7 @@ class TcpClient
 {
 public:
     TcpClient();
+    ~TcpClient();
     bool connect( uint32_t ipv4_addr , uint16_t port );
     bool connect( char* ipv4_addr_str , uint16_t port );
     bool disconnect();
@@ -17,6 +18,7 @@ public:
     bool readAll( uint8_t* buf , uint16_t buf_len );
 private:
     QTcpSocket* sock = nullptr;
+    bool waitConnect();
 };
 
 #endif // TCPCLIENT_H
