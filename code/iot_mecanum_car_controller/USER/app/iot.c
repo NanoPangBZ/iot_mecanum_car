@@ -18,17 +18,11 @@ static scp_trans_decoder_t decoder;
 static int iot_send_port( uint8_t* data , uint16_t len );
 static int iot_recieve_respond( scp_pack_t* pack );
 
+#include "hmi.h"
+
 static int iot_recieve_respond( scp_pack_t* pack )
 {
-    switch ( pack->cmd_word )
-    {
-    case 0x01:
-        
-        break;
-    
-    default:
-        break;
-    }
+    beep_notice( BEEP_SYS_DEBUG );
     return 0;
 }
 

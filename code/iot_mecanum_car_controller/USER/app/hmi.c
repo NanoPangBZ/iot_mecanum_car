@@ -72,6 +72,14 @@ static void beep_task( void* param )
                     vTaskDelay( SYS_INIT_BEEP_OFF_TIME / portTICK_PERIOD_MS );
                 }
             break;
+            case BEEP_SYS_DEBUG:
+                bsp_beep_on( 500 );
+                vTaskDelay( 80 / portTICK_PERIOD_MS );
+                bsp_beep_on( 700 );
+                vTaskDelay( 80 / portTICK_PERIOD_MS );
+                bsp_beep_off();
+                vTaskDelay( 80 / portTICK_PERIOD_MS );
+            break;
             default:
             break;
         }

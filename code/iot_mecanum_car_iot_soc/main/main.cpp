@@ -62,6 +62,7 @@ static int scp_recieve_respond( scp_pack_t* pack )
         printf("\n");
     }
     printf("\n");
+    send_scp_pack( pack );
     return 0;
 }
 
@@ -74,14 +75,14 @@ static int tcp_send( uint8_t* data , uint16_t len )
 
 static void uart_recieve_decode_task( void* param )
 {
-    uint8_t recieve_buf[512];
+    uint8_t recieve_buf[64];
     uint8_t decoder_buf[512];
     int count = 0;
     scp_pack_t pack = scp_trans_pack_create( decoder_buf , 512 );
     scp_trans_decoder_t decoder = scp_trans_decoder_create( &pack , scp_recieve_respond );
     while(1)
     {
-        count = bsp_uart_recieve( recieve_buf , 64 , 20 );
+        count = bsp_uart_recieve( recieve_buf , 64 , 30 );
         if( count > 0 )
         {
             scp_trans_decoder_input( &decoder , recieve_buf , count );
@@ -92,20 +93,20 @@ static void uart_recieve_decode_task( void* param )
 
 static void send_scp_pack( scp_pack_t* pack )
 {
-    if( pack->control_word )
-    {
+    // if( pack->control_word )
+    // {
         xSemaphoreTake( uart_tx_lock , -1 );
         scp_trans_send( pack , bsp_uart_send );
         xSemaphoreGive( uart_tx_lock );
-    }else
-    {
-        if( _s_sock != -1 )
-        {
-            xSemaphoreTake( tcp_tx_lock , -1 );
-            scp_trans_send( pack , tcp_send );
-            xSemaphoreGive( tcp_tx_lock );
-        }
-    }
+    // }else
+    // {
+    //     if( _s_sock != -1 )
+    //     {
+    //         xSemaphoreTake( tcp_tx_lock , -1 );
+    //         scp_trans_send( pack , tcp_send );
+    //         xSemaphoreGive( tcp_tx_lock );
+    //     }
+    // }
 }
 
 extern "C" void app_main(void)
@@ -118,13 +119,14 @@ extern "C" void app_main(void)
 
     uart_tx_lock = xSemaphoreCreateBinary();
     tcp_tx_lock = xSemaphoreCreateBinary();
+    xSemaphoreGive( uart_tx_lock );
 
     xTaskCreatePinnedToCore(
         uart_recieve_decode_task,
         "uart rx",
         3072,
         NULL,
-        13,
+        8,
         NULL,
         tskNO_AFFINITY
     );

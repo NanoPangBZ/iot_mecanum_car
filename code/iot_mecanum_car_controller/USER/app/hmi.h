@@ -18,6 +18,7 @@ typedef enum{
     BEEP_NONE,
     BEEP_KEY_INPUT,
     BEEP_SYS_INIT_FINNISH,
+    BEEP_SYS_DEBUG,
 }beep_notice_t;
 
 void hmi_start( void );

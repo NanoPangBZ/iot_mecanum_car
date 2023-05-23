@@ -23,6 +23,7 @@ static void init_task( void* param )
 {
     motion_control_start();
     hmi_start();
+    iot_start();
 
     motion_control_function_disable( YAW_LOCK );
     motion_control_function_disable( TARGET_POSITION );
@@ -41,7 +42,6 @@ static void init_task( void* param )
     while(1)
     {
         iot_send( &t );
-        // bsp_uart_send( &huart3 , "HelloWorld!" , strlen( "HelloWorld!" ) );
         vTaskDelay( 1000 / portTICK_PERIOD_MS );
     }
 
