@@ -1,5 +1,7 @@
 /**
  * @brief 简单通讯协议传输层
+ * @bug 调用scp_trans_send后会对pack中的payload.buf中的值复写!!!
+ *      注意每次调用前要对pack进行赋值。暂时不能多次复用!!
  * @anchor 庞
 */
 
