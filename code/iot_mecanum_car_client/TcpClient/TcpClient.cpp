@@ -48,6 +48,7 @@ bool TcpClient::send( uint8_t* data , uint16_t len )
     }
 
     sock->write( (char*)data , len );
+    sock->flush();
 
     return true;
 }

@@ -1,6 +1,7 @@
 QT += quick network
 
 SOURCES += \
+        ../common_code/simple_communicate_protocol/transmission/scp_trans.c \
         BackendThread.cpp \
         TcpClient/TcpClient.cpp \
         main.cpp
@@ -17,8 +18,11 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    ../common_code/simple_communicate_protocol/transmission/scp_trans.h \
     BackendThread.h \
     TcpClient/TcpClient.h
+
+INCLUDEPATH += ../common_code/simple_communicate_protocol/transmission
 
 DISTFILES += \
     UI/main.qml

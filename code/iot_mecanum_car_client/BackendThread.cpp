@@ -5,6 +5,7 @@
 #include <math.h>
 
 #include "TcpClient/TcpClient.h"
+#include "scp_trans.h"
 
 //唯一实例
 BackendThread BackendThread::backendThread;
@@ -15,6 +16,14 @@ extern QObject* qmlObj;
 //静态变量
 static TcpClient* client = NULL;
 
+//包装
+static int send_port( uint8_t* data , uint16_t len )
+{
+    if( client == nullptr )
+        return -1;
+    return client->send( data , len ) ? len : -1;
+}
+
 //后台线程
 void* BackendThread::_main(void*param)
 {
@@ -23,10 +32,22 @@ void* BackendThread::_main(void*param)
 
     backendThread.setCarRectangle( 100 , 140 );
 
-    float t = 0;
+    uint8_t buf[1024];
+    scp_pack_t pack = scp_trans_pack_create( buf , 1024 );
+
     while(1)
     {
-        Sleep(200);
+        if( client != nullptr )
+        {
+            pack.cmd_word = 0xfe;
+            pack.control_word = 0x01 << 0;
+            pack.payload_len = 72;
+            for( uint8_t temp = 0; temp < 72 ; temp++ )
+                pack.payload.buf[ temp ] = temp;
+            scp_trans_send( &pack , send_port );
+            qDebug("test send");
+        }
+        Sleep(5000);
     }
     return param;
 }

@@ -262,7 +262,7 @@ Window {
             font.pixelSize: parent.width * 0.03
 
             onClicked: {
-                backend.autoConnectCar()
+                backend.connectCar( ipv4_input.text )
             }
         }
 
@@ -325,7 +325,7 @@ Window {
                 anchors.right: parent.right
                 height: parent.height * 0.5
                 TextInput{
-                    id:input
+                    id:ipv4_input
                     width: parent.width
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.horizontalCenter : parent.horizontalCenter
