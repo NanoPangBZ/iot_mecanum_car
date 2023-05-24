@@ -30,21 +30,6 @@ static void init_task( void* param )
 
     // beep_notice( BEEP_SYS_INIT_FINNISH );
 
-    uint8_t buf[96];
-    scp_pack_t t = scp_trans_pack_create( buf , 96 );
-    t.cmd_word = 0x00;
-    t.control_word = 0xff;
-    for( uint8_t temp = 0 ;temp < 72 ; temp++ )
-    {
-        t.payload.buf[ temp ] = temp;
-    }
-    t.payload_len = 72;
-    while(1)
-    {
-        iot_send( &t );
-        vTaskDelay( 1000 / portTICK_PERIOD_MS );
-    }
-
     vTaskDelete( NULL );
 }
 

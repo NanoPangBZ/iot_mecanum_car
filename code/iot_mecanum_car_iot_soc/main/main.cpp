@@ -38,7 +38,6 @@ static void tcpApp( int sock )
             return;
         }
         scp_trans_decoder_input( &decoder , buf , len );
-        // send(sock, buf ,  len , 0);
         ESP_LOGI( TAG , "Tick" );
     }
 }
