@@ -53,6 +53,17 @@ bool TcpClient::send( uint8_t* data , uint16_t len )
     return true;
 }
 
+int TcpClient::readAll( uint8_t* buf )
+{
+    int len = 0;
+    QByteArray ba;
+    sock->waitForReadyRead();
+    ba = sock->readAll();
+    len = ba.length();
+    memcpy( buf , ba.data() , len );
+    return len;
+}
+
 bool TcpClient::disconnect()
 {
     if( sock == nullptr )

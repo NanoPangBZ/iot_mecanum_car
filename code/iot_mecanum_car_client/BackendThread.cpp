@@ -24,6 +24,27 @@ static int send_port( uint8_t* data , uint16_t len )
     return client->send( data , len ) ? len : -1;
 }
 
+static int scp_recieve_respond( scp_pack_t* pack )
+{
+    printf("pack printf.\n");
+        printf( "control word: 0x%04X\n" , pack->control_word );
+        printf( "cmd word: 0x%02x\n" , pack->cmd_word );
+        printf( "param:\n" );
+        int index = 0;
+        while( index < pack->payload_len )
+        {
+            for( int line_c = 0 ; line_c < 16 ; line_c++ )
+            {
+                if( index < pack->payload_len )
+                    printf( "0x%02X  " , pack->payload.buf[index] );
+                index ++;
+            }
+            printf("\n");
+        }
+        printf("\n");
+    return 0;
+}
+
 //后台线程
 void* BackendThread::_main(void*param)
 {
@@ -32,20 +53,25 @@ void* BackendThread::_main(void*param)
 
     backendThread.setCarRectangle( 100 , 140 );
 
-    uint8_t buf[1024];
-    scp_pack_t pack = scp_trans_pack_create( buf , 1024 );
+    uint8_t send_buf[1024];
+    uint8_t decoder_buf[1024];
+    uint8_t tcp_buf[512];
+    scp_pack_t send_pack = scp_trans_pack_create( send_buf , 1024 );
+    scp_pack_t recieve_pack = scp_trans_pack_create( decoder_buf , 1024 );
+    scp_trans_decoder_t decoder = scp_trans_decoder_create( &recieve_pack , scp_recieve_respond );
 
     while(1)
     {
         if( client != nullptr )
         {
-            pack.cmd_word = 0xfe;
-            pack.control_word = 0xffff;
-            pack.payload_len = 72;
+            send_pack.cmd_word = 0xfe;
+            send_pack.control_word = 0xffff;
+            send_pack.payload_len = 72;
             for( uint8_t temp = 0; temp < 72 ; temp++ )
-                pack.payload.buf[ temp ] = temp;
-            scp_trans_send( &pack , send_port );
+                send_pack.payload.buf[ temp ] = temp;
+            scp_trans_send( &send_pack , send_port );
             qDebug("test send");
+            scp_trans_decoder_input( &decoder , tcp_buf , client->readAll( tcp_buf ) );
         }
         Sleep(5000);
     }

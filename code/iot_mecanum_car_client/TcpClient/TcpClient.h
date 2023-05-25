@@ -15,7 +15,7 @@ public:
     bool disconnect();
     bool isConnect();
     bool send( uint8_t* data , uint16_t len );
-    bool readAll( uint8_t* buf , uint16_t buf_len );
+    int readAll( uint8_t* buf );
 private:
     QTcpSocket* sock = nullptr;
     bool waitConnect();
