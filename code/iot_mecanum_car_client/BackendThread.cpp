@@ -40,7 +40,7 @@ void* BackendThread::_main(void*param)
         if( client != nullptr )
         {
             pack.cmd_word = 0xfe;
-            pack.control_word = 0x01 << 0;
+            pack.control_word = 0xffff;
             pack.payload_len = 72;
             for( uint8_t temp = 0; temp < 72 ; temp++ )
                 pack.payload.buf[ temp ] = temp;

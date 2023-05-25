@@ -1,4 +1,5 @@
 #include "iot.h"
+#include <string.h>
 
 #include "bsp.h"
 #include "hardware.h"
@@ -54,7 +55,7 @@ static int iot_recieve_respond( scp_pack_t* pack )
 
 static int iot_send_port( uint8_t* data , uint16_t len )
 {
-    while( bsp_uart_send( &huart3 , data , len ) != 0 );
+    while( bsp_uart_send( &huart3 , data , len ) != 0 ){}
     return len;
 }
 
@@ -94,11 +95,19 @@ static void iot_respond_task( void* param )
                 motion_set_target_position( _buf_to_float( payload_addr ) , _buf_to_float( payload_addr + 4 ) , SOFT_REF );
             break;
         }
+        send_pack.control_word = 0;
+        send_pack.cmd_word = recieve_pack.cmd_word;
+        send_pack.payload_len = recieve_pack.payload_len;
+        memcpy( send_pack.payload.buf , recieve_pack.payload.buf , recieve_pack.payload_len );
+        iot_send( &send_pack );
         beep_notice( BEEP_SYS_DEBUG );
     }
 }
 
 void iot_port_input( uint8_t byte )
 {
-    if( init ) scp_trans_decoder_input_byte( &decoder , byte );
+    if( init )
+    {
+        scp_trans_decoder_input_byte( &decoder , byte );
+    }
 }

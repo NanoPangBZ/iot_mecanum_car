@@ -44,23 +44,6 @@ static void tcpApp( int sock )
 
 static int scp_recieve_respond( scp_pack_t* pack )
 {
-    ESP_LOGI( TAG , "scp pack recieve respodn" );
-    printf("pack printf.\n");
-    printf( "control word: 0x%04X\n" , pack->control_word );
-    printf( "cmd word: 0x%02x\n" , pack->cmd_word );
-    printf( "param:\n" );
-    int index = 0;
-    while( index < pack->payload_len )
-    {
-        for( int line_c = 0 ; line_c < 16 ; line_c++ )
-        {
-            if( index < pack->payload_len )
-                printf( "0x%02X  " , pack->payload.buf[index] );
-            index ++;
-        }
-        printf("\n");
-    }
-    printf("\n");
     send_scp_pack( pack );
     return 0;
 }
@@ -92,20 +75,20 @@ static void uart_recieve_decode_task( void* param )
 
 static void send_scp_pack( scp_pack_t* pack )
 {
-    // if( pack->control_word )
-    // {
+    if( pack->control_word )
+    {
         xSemaphoreTake( uart_tx_lock , -1 );
         scp_trans_send( pack , bsp_uart_send );
         xSemaphoreGive( uart_tx_lock );
-    // }else
-    // {
-    //     if( _s_sock != -1 )
-    //     {
-    //         xSemaphoreTake( tcp_tx_lock , -1 );
-    //         scp_trans_send( pack , tcp_send );
-    //         xSemaphoreGive( tcp_tx_lock );
-    //     }
-    // }
+    }else
+    {
+        if( _s_sock != -1 )
+        {
+            xSemaphoreTake( tcp_tx_lock , -1 );
+            scp_trans_send( pack , tcp_send );
+            xSemaphoreGive( tcp_tx_lock );
+        }
+    }
 }
 
 extern "C" void app_main(void)
