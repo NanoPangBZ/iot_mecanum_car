@@ -12,9 +12,9 @@
 
 #include <math.h>
 
-#define SPEED_PID_P 28
-#define SPEED_PID_I 22
-#define SPEED_PID_D 18
+#define DEFAULT_SPEED_PID_P 28
+#define DEFAULT_SPEED_PID_I 22
+#define DEFAULT_SPEED_PID_D 18
 
 #define WHELL_SPEED_MIN 100
 #define WHELL_SPEED_MAX 3000
@@ -26,6 +26,7 @@ static mecanum_constant_t           model = { 1 , 1 , 1 };      //脉轮运动�
 static mecanum_center_speed_t       car_target_speed = { 0 , 0 , 0 };   //小车最终合成的速度矢量 -> 小车坐标系
 static mecanum_center_speed_t       car_real_speed = { 0 , 0 , 0 };     //运动学正解实际轮子速度获得的当前小车运动矢量 -> 小车坐标系
 static float                        car_position[2];       //当前位置 -> 程序参考坐标系
+static short int                    car_current_wheel_speed[4];
 
 //用户层设置
 static motion_control_function_t  motion_control_function = 0;
@@ -33,57 +34,64 @@ static mecanum_center_speed_t   user_target_speed = { 0 , 0 , 0 };
 static position_reference_t     user_targer_speed_ref = CAR_REF;
 static float                    user_target_position[2] = { 0 , 0 };    //坐标系 - soft
 static float                    user_target_yaw = 0;
-
+static PID_Handle yaw_pid = { 7.2 , 0.01 , 0.02 , 1.0 , 0 , 0 , { 0 , 0 , 0  } , 1000 , -1000 };
+static PID_Handle speed_pid[4];
 
 //小车速度控制线程 -> 最终实现控制的线程
 static TaskHandle_t _car_speed_control_taskHandle = NULL;
 static void car_speed_control_task( void* param );
 
-//小车航目标速度设置线程
+//小车目标速度设置线程
 static TaskHandle_t _target_speed_set_taskHanle = NULL;
 static void _target_speed_set_task( void* param );
 
 void car_speed_control_task( void* param )
 {
     mecanum_input_t wheel_speed;
-    PID_Handle pid[4];
     TickType_t time = xTaskGetTickCount();
     float program_speed[2]; //程序
-    short int encoder_speed;
     
     //PID句柄初始化
     for( uint8_t temp = 0 ; temp < 4 ; temp++ )
     {
-        pid[temp].P = SPEED_PID_P;
-        pid[temp].I = SPEED_PID_I;
-        pid[temp].D = SPEED_PID_D;
-        pid[temp].out_zoom = 1;
-        pid[temp].OutputMax = 65535;
-        pid[temp].OutputMin = -65535;
+        speed_pid[temp].P = DEFAULT_SPEED_PID_P;
+        speed_pid[temp].I = DEFAULT_SPEED_PID_I;
+        speed_pid[temp].D = DEFAULT_SPEED_PID_D;
+        speed_pid[temp].out_zoom = 1;
+        speed_pid[temp].OutputMax = 65535;
+        speed_pid[temp].OutputMin = -65535;
     }
 
     while(1)
     {
         //通过小车目标速度逆解各轮子的目标速度
         mecanum_inverse_calculate( &model , &wheel_speed , &car_target_speed );
+        //轮子速度pid控制运算
         for( uint8_t temp = 0; temp < 4; temp++ )
         {
             //获取当前速度
-            encoder_speed = bsp_encoder_get_and_clear_value(temp);
+            car_current_wheel_speed[temp] = bsp_encoder_get_and_clear_value(temp);
 
             if( wheel_speed[temp] < WHELL_SPEED_MIN && wheel_speed[temp] > -WHELL_SPEED_MIN )
             {
-                pid[temp].Target = 0;
-                dc_motor_output( temp , 0 );
+                speed_pid[temp].Target = 0;
+                speed_pid[temp].Output = 0;
+                // dc_motor_output( temp , 0 );
             }else
             {
-                pid[temp].Target = wheel_speed[temp];
-                PID_IncOperation( &pid[temp] , encoder_speed );
-                dc_motor_output( temp , pid[temp].Output );
+                speed_pid[temp].Target = wheel_speed[temp];
+                PID_IncOperation( &speed_pid[temp] , car_current_wheel_speed[temp] );
+                // dc_motor_output( temp , speed_pid[temp].Output );
             }
             
-            wheel_speed[temp] = encoder_speed;  //记录实际速度 用于开环速度积分
+            //将实际速度载入mecanum_input_t中 用于后文速度积分
+            wheel_speed[temp] = car_current_wheel_speed[temp];
         }
+
+        //输出
+        for( uint8_t temp = 0 ;temp < 4 ; temp++ )
+            dc_motor_output( temp , speed_pid[temp].Output );
+
 
         //通过实际轮子速度计算小车速度 对其积分 计算位移
         // mecanum_positive_calculate( &model , &wheel_speed , &car_real_speed );
@@ -97,25 +105,25 @@ void car_speed_control_task( void* param )
 void _target_speed_set_task( void* param )
 {
     TickType_t time = xTaskGetTickCount();
-    PID_Handle yaw_pid = { 7.2 , 0.01 , 0.02 , 1.0 , 0 , 0 , { 0 , 0 , 0  } , 1000 , -1000 };
     float threshold;
     float err_yaw ;
-    yaw_pid.Target = 0; //目标值始终为0
     while(1)
     {
-        if( motion_control_function & TARGET_POSITION )
-        {
-            if( motion_control_function & POSITION_PID )
-            {
+        yaw_pid.Target = 0; //目标值始终为0
 
-            }else
-            {
+        // if( motion_control_function & TARGET_POSITION )
+        // {
+        //     if( motion_control_function & POSITION_PID )
+        //     {
+
+        //     }else
+        //     {
                 
-            }
-        }else
-        {
+        //     }
+        // }else
+        // {
             car_target_speed = user_target_speed;
-        }
+        // }
         
         if( motion_control_function & YAW_LOCK )
         {
@@ -130,6 +138,16 @@ void _target_speed_set_task( void* param )
 
         vTaskDelayUntil( &time , 50 / portTICK_PERIOD_MS );
     }
+}
+
+motion_control_function_t motion_get_current_function( void )
+{
+    return motion_control_function;
+}
+
+void motion_get_current_wheel_speed( float* _4float )
+{
+
 }
 
 void motion_control_start()

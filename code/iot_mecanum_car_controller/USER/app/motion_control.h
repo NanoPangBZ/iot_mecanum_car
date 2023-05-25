@@ -34,6 +34,8 @@ void motion_set_target_yaw( float yaw );
 float motion_get_yaw( void );
 void motion_get_position( float* x , float* y , position_reference_t ref);
 void motion_get_target_position( float* x , float*y , position_reference_t ref );
+void motion_get_current_wheel_speed( float* _4float );
+motion_control_function_t motion_get_current_function( void );
 
 #endif  //_MOTION_CONTROL_H_
 
